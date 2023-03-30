@@ -311,25 +311,25 @@ class NFA:
         self.nfa_stack.append(nfa)
 
      
-    # def handle_or(self, t, nfa_stack):
-    #     n2 = nfa_stack.pop()
-    #     n1 = nfa_stack.pop()
-    #     s0 = self.create_state()
-    #     s0.epsilon = [n1.start, n2.start]
-    #     s3 = self.create_state()
-    #     n1.end.epsilon.append(s3)
-    #     n2.end.epsilon.append(s3)
-    #     n1.end.is_end = False
-    #     n2.end.is_end = False
-    #     if n1.end in self.end_state:
-    #         self.end_state.remove(n1.end)
-    #     if n2.end in self.end_state:
-    #         self.end_state.remove(n2.end)
+    def handle_or(self, t, nfa_stack):
+        n2 = nfa_stack.pop()
+        n1 = nfa_stack.pop()
+        s0 = self.create_state()
+        s0.epsilon = [n1.start, n2.start]
+        s3 = self.create_state()
+        n1.end.epsilon.append(s3)
+        n2.end.epsilon.append(s3)
+        n1.end.is_end = False
+        n2.end.is_end = False
+        if n1.end in self.end_state:
+            self.end_state.remove(n1.end)
+        if n2.end in self.end_state:
+            self.end_state.remove(n2.end)
 
-    #     nfa = NodeGraph(s0, s3)
-    #     self.end_state.add(s3)
+        nfa = NodeGraph(s0, s3)
+        self.end_state.add(s3)
 
-    #     nfa_stack.append(nfa)
+        nfa_stack.append(nfa)
     
     # def handle_star(self, t, nfa_stack):
     #     n1 = nfa_stack.pop()

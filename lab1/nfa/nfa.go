@@ -6,15 +6,9 @@ import (
 	"strconv"
 )
 
-type nodeGraph struct {
-	start state
-	end   state
-	isEnd bool
-}
-
 type NFA struct {
 	alphabet   []string
-	stack      []nodeGraph
+	stack      stack
 	stateCount int
 
 	head     nodeGraph
@@ -40,21 +34,20 @@ func (nfa *NFA) Build(tokens []Symbol) {
 	for i := 0; i < len(tokens); i++ {
 		curToken := tokens[i]
 
-		if curToken.Name == "CHAR" {
+		if curToken.Desc == "CHAR" {
 			nfa.handleChar(curToken)
 			charSet[curToken.Value] = true
-		} else if curToken.Name == "CONCAT" {
+		} else if curToken.Desc == "CONCAT" {
 			nfa.handleConcat()
-		} //} else if curToken.Name == "OR" {
+		} //else if curToken.Name == "OR" {
 		//	nfa.handleOr()
-		//} else if curToken.Name == "STAR" {
+		//} // else if curToken.Name == "STAR" {
 		//	nfa.handleStar()
 		//}
 	}
 
 	nfa.initAlphabet(charSet)
-	nfa.head = nfa.stack[len(nfa.stack)-1]
-	nfa.stack = nfa.stack[:len(nfa.stack)-1]
+	nfa.stack, nfa.head = nfa.stack.Pop()
 }
 
 func (nfa *NFA) createState() state {
@@ -74,7 +67,7 @@ func (nfa *NFA) handleChar(symb Symbol) {
 	curNfa := nodeGraph{start: s0, end: s1, isEnd: true}
 	nfa.endState[s1.name] = true
 	//nfa.endState = append(nfa.endState, s1)
-	nfa.stack = append(nfa.stack, curNfa)
+	nfa.stack = nfa.stack.Push(curNfa)
 }
 
 func idxInArray(st state, stArr []state) int {
@@ -95,11 +88,9 @@ func remove(stArr []state, idx int) []state {
 }
 
 func (nfa *NFA) handleConcat() {
-	n2 := nfa.stack[len(nfa.stack)-1]
-	nfa.stack = nfa.stack[:len(nfa.stack)-1]
-
-	n1 := nfa.stack[len(nfa.stack)-1]
-	nfa.stack = nfa.stack[:len(nfa.stack)-1]
+	var n1, n2 nodeGraph
+	nfa.stack, n2 = nfa.stack.Pop()
+	nfa.stack, n1 = nfa.stack.Pop()
 
 	n1.isEnd = false
 
@@ -118,7 +109,7 @@ func (nfa *NFA) handleConcat() {
 	curNfa := nodeGraph{start: n1.start, end: n2.end, isEnd: true}
 	nfa.endState[n2.end.name] = true
 	//nfa.endState = append(nfa.endState, n2.end)
-	nfa.stack = append(nfa.stack, curNfa)
+	nfa.stack = nfa.stack.Push(curNfa)
 }
 
 //func (nfa *NFA) handleOr() {

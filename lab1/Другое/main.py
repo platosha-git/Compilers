@@ -5,17 +5,18 @@ def build(p):
 
     parser = Parser()
     tokens = parser.parse(p)
+
+    for i in range(len(tokens)):
+        print(tokens[i])
     
     if len(tokens) == 0:
         print('Empty regular expression')
         return None 
 
-    nfa = NFA()
-    for i in tokens:
-        print(i)   
+    nfa = NFA()  
     nfa.build(tokens)
     
-    nfa.print_graph()
+    #nfa.print_graph()
 
     dfa = DFA()
     #dfa.convert_nfa_to_dfa(nfa)

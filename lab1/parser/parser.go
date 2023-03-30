@@ -1,10 +1,11 @@
 package parser
 
 type Parser struct {
-	symbols        []Symbol
-	origSymbols    []Symbol
-	origSymbolsIdx int
-	headSymbol     Symbol
+	descSymbols    []Symbol
+	descSymbolsIdx int
+
+	regSymbols []Symbol
+	curSymbol  Symbol
 }
 
 func (parser *Parser) Parse(regular []rune) []Symbol {
@@ -12,76 +13,77 @@ func (parser *Parser) Parse(regular []rune) []Symbol {
 		return nil
 	}
 
-	parser.createSymbols(regular)
+	parser.describeSymbols(regular)
 	parser.handleSymbols()
 
-	return parser.symbols
+	return parser.regSymbols
 }
 
-func (parser *Parser) createSymbols(regular []rune) {
-	for i := 0; i < len(regular); i++ {
-		curSymb := regular[i]
+func (parser *Parser) describeSymbols(regular []rune) {
+	for _, char := range regular {
+		idx := IdxInDictionary(char)
 
-		var token Symbol
-		idx := IdxInDictionary(curSymb)
-
+		var descSymbol Symbol
 		if idx < 0 {
-			token = Symbol{Name: "CHAR", Value: string(curSymb)}
+			descSymbol = Symbol{Desc: "CHAR", Value: string(char)}
 		} else {
-			name := DictionaryNames[idx]
-			token = Symbol{Name: name, Value: string(curSymb)}
+			desc := DictionaryDescs[idx]
+			descSymbol = Symbol{Desc: desc, Value: string(char)}
 		}
 
-		parser.origSymbols = append(parser.origSymbols, token)
+		parser.descSymbols = append(parser.descSymbols, descSymbol)
 	}
-	parser.headSymbol = parser.origSymbols[parser.origSymbolsIdx]
-	parser.origSymbolsIdx++
+	parser.curSymbol = parser.descSymbols[parser.descSymbolsIdx]
+	parser.descSymbolsIdx++
 }
 
 func (parser *Parser) handleSymbols() {
-	parser.handleConcat()
-	if parser.headSymbol.Name == "OR" {
-		t := parser.headSymbol
-		parser.checkAndNext("OR")
-		parser.handleSymbols()
-		parser.symbols = append(parser.symbols, t)
+	if parser.curSymbol.Desc == "LB" {
+		parser.handleBrackets()
+	} else if parser.curSymbol.Desc == "CHAR" {
+		parser.handleInnerPart("CHAR")
+	}
+	if parser.curSymbol.Desc == "STAR" {
+		parser.handleInnerPart("STAR")
+	}
+	if parser.curSymbol.Value != ")" && parser.curSymbol.Value != "|" && parser.curSymbol.Value != "" {
+		parser.handleExternalPart()
+	}
+	if parser.curSymbol.Desc == "OR" {
+		parser.handleOr()
 	}
 }
 
-func (parser *Parser) handleConcat() {
-	parser.handleStar()
-	if parser.headSymbol.Value != ")" && parser.headSymbol.Value != "|" && parser.headSymbol.Value != "" {
-		parser.handleConcat()
-		parser.symbols = append(parser.symbols, Symbol{"CONCAT", "CONCAT"})
-	}
+func (parser *Parser) handleBrackets() {
+	parser.nextSymbol("LB")
+	parser.handleSymbols()
+	parser.nextSymbol("RB")
 }
 
-func (parser *Parser) handleStar() {
-	parser.handleChar()
-	if parser.headSymbol.Name == "STAR" {
-		parser.symbols = append(parser.symbols, parser.headSymbol)
-		parser.checkAndNext(parser.headSymbol.Name)
-	}
+func (parser *Parser) handleInnerPart(desc string) {
+	parser.regSymbols = append(parser.regSymbols, parser.curSymbol)
+	parser.nextSymbol(desc)
 }
 
-func (parser *Parser) handleChar() {
-	if parser.headSymbol.Name == "LP" {
-		parser.checkAndNext("LP")
-		parser.handleSymbols()
-		parser.checkAndNext("RP")
-	} else if parser.headSymbol.Name == "CHAR" {
-		parser.symbols = append(parser.symbols, parser.headSymbol)
-		parser.checkAndNext("CHAR")
-	}
+func (parser *Parser) handleExternalPart() {
+	parser.handleSymbols()
+	parser.regSymbols = append(parser.regSymbols, Symbol{"CONCAT", "CONCAT"})
 }
 
-func (parser *Parser) checkAndNext(name string) {
-	if parser.headSymbol.Name == name {
-		if parser.origSymbolsIdx >= len(parser.origSymbols) {
-			parser.headSymbol = Symbol{"NONE", ""}
+func (parser *Parser) handleOr() {
+	t := parser.curSymbol
+	parser.nextSymbol("OR")
+	parser.handleSymbols()
+	parser.regSymbols = append(parser.regSymbols, t)
+}
+
+func (parser *Parser) nextSymbol(description string) {
+	if parser.curSymbol.Desc == description {
+		if parser.descSymbolsIdx >= len(parser.descSymbols) {
+			parser.curSymbol = Symbol{"NONE", ""}
 		} else {
-			parser.headSymbol = parser.origSymbols[parser.origSymbolsIdx]
+			parser.curSymbol = parser.descSymbols[parser.descSymbolsIdx]
 		}
-		parser.origSymbolsIdx++
+		parser.descSymbolsIdx++
 	}
 }
