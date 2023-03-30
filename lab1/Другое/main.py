@@ -13,11 +13,11 @@ def build(p):
     nfa = NFA()
     nfa.build(tokens)
     
-    #nfa.print_graph()
+    nfa.print_graph()
 
     dfa = DFA()
-    dfa.convert_nfa_to_dfa(nfa)
-    dfa.minimization()
+    #dfa.convert_nfa_to_dfa(nfa)
+    #dfa.minimization()
     
     return dfa
 

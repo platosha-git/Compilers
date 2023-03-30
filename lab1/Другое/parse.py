@@ -34,9 +34,6 @@ class Parser:
         self.create_symbols(pattern)       
         self.handle_symbols()
         
-        for c in self.symbols:
-            print(c.name, " ", c.value)
-        
         return self.symbols
     
     def handle_symbols(self):
@@ -49,10 +46,7 @@ class Parser:
 
     def handle_concat(self):
         self.handle_star()
-        print("IN CONCAT:", self.lookahead.value)
-        print("IF:", '' not in ')|')
         if self.lookahead.value not in ')|':
-            print("HERE2")
             self.handle_concat()
             self.symbols.append(Symbol('CONCAT', 'CONCAT'))
     
@@ -68,18 +62,14 @@ class Parser:
             self.handle_symbols()
             self.check_and_next('RP')
         elif self.lookahead.name == 'CHAR':
-            print("HERE1")
             self.symbols.append(self.lookahead)
             self.check_and_next('CHAR')
 
     def check_and_next(self, name):
         if self.lookahead.name == name:
-            print("LEN = ", len(self.orig_symbols))
             if self.orig_symbols_index >= len(self.orig_symbols):
                 self.lookahead = Symbol('NONE', '')
             else:
-                print("IDX = ", self.orig_symbols_index)
-                print("ORIG SYMBS = ", self.orig_symbols[self.orig_symbols_index])
                 self.lookahead = self.orig_symbols[self.orig_symbols_index]
             self.orig_symbols_index += 1
 
