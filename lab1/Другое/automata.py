@@ -238,18 +238,24 @@ class NFA:
         ind = 0
         state_array = []
         state_array.append(self.nfa_head.start)
+
         while ind < len(state_array):
             current_state = state_array[ind]
+
             print(ind, ')', 'from:', current_state)
             print('by epsilon to:', end=' ')
+
             for eps_state in current_state.epsilon:
                 print(eps_state, end=' ')
+ 
                 if eps_state not in state_array:
                     state_array.append(eps_state)
                     
             print()
+
             for char, state in current_state.transitions.items():
                 print('by', char, 'to', state, end = ' ')
+
                 if state not in state_array:
                     state_array.append(state)
             
@@ -259,17 +265,18 @@ class NFA:
 
     def build(self, tokens):
         char_set = set()
+
         for t in tokens:
             if t.name == 'CHAR':
-                self.handle_char(t, self.nfa_stack)
+                self.handle_char(t)
                 char_set.add(t.value)
             elif t.name == 'CONCAT':
-                self.handle_concat(t, self.nfa_stack)
+                self.handle_concat()
             elif t.name == 'OR':
                 self.handle_or(t, self.nfa_stack)
             elif t.name == 'STAR':
                 self.handle_star(t, self.nfa_stack)
-                            
+        
         self.alphabet = list(char_set)
         self.nfa_head = self.nfa_stack.pop()
 
@@ -277,64 +284,67 @@ class NFA:
         self.state_count += 1
         return State('s' + str(self.state_count))
     
-    def handle_char(self, t, nfa_stack):
+    def handle_char(self, t):
         s0 = self.create_state()
         s1 = self.create_state()
+
         s0.transitions[t.value] = s1
+        
         nfa = NodeGraph(s0, s1)
         self.end_state.add(s1)
-        nfa_stack.append(nfa)
+        self.nfa_stack.append(nfa)
 
       
-    def handle_concat(self, t, nfa_stack):
-        n2 = nfa_stack.pop()
-        n1 = nfa_stack.pop()
+    def handle_concat(self):
+        n2 = self.nfa_stack.pop()
+        n1 = self.nfa_stack.pop()
+
         n1.end.is_end = False
         if n1.end in self.end_state:
-            self.end_state.remove( n1.end)
+            self.end_state.remove(n1.end)
 
         n1.end.epsilon = n2.start.epsilon # new
         n1.end.transitions = n2.start.transitions 
 
         nfa = NodeGraph(n1.start, n2.end)
         self.end_state.add(n2.end)
-        nfa_stack.append(nfa)
+        self.nfa_stack.append(nfa)
 
      
-    def handle_or(self, t, nfa_stack):
-        n2 = nfa_stack.pop()
-        n1 = nfa_stack.pop()
-        s0 = self.create_state()
-        s0.epsilon = [n1.start, n2.start]
-        s3 = self.create_state()
-        n1.end.epsilon.append(s3)
-        n2.end.epsilon.append(s3)
-        n1.end.is_end = False
-        n2.end.is_end = False
-        if n1.end in self.end_state:
-            self.end_state.remove(n1.end)
-        if n2.end in self.end_state:
-            self.end_state.remove(n2.end)
+    # def handle_or(self, t, nfa_stack):
+    #     n2 = nfa_stack.pop()
+    #     n1 = nfa_stack.pop()
+    #     s0 = self.create_state()
+    #     s0.epsilon = [n1.start, n2.start]
+    #     s3 = self.create_state()
+    #     n1.end.epsilon.append(s3)
+    #     n2.end.epsilon.append(s3)
+    #     n1.end.is_end = False
+    #     n2.end.is_end = False
+    #     if n1.end in self.end_state:
+    #         self.end_state.remove(n1.end)
+    #     if n2.end in self.end_state:
+    #         self.end_state.remove(n2.end)
 
-        nfa = NodeGraph(s0, s3)
-        self.end_state.add(s3)
+    #     nfa = NodeGraph(s0, s3)
+    #     self.end_state.add(s3)
 
-        nfa_stack.append(nfa)
+    #     nfa_stack.append(nfa)
     
-    def handle_star(self, t, nfa_stack):
-        n1 = nfa_stack.pop()
-        s0 = self.create_state()
-        s1 = self.create_state()
-        s0.epsilon = [n1.start]
-        s0.epsilon.append(s1)
-        n1.end.epsilon.extend([s1, n1.start])
-        n1.end.is_end = False
-        if n1.end in self.end_state:
-            self.end_state.remove(n1.end)
+    # def handle_star(self, t, nfa_stack):
+    #     n1 = nfa_stack.pop()
+    #     s0 = self.create_state()
+    #     s1 = self.create_state()
+    #     s0.epsilon = [n1.start]
+    #     s0.epsilon.append(s1)
+    #     n1.end.epsilon.extend([s1, n1.start])
+    #     n1.end.is_end = False
+    #     if n1.end in self.end_state:
+    #         self.end_state.remove(n1.end)
 
-        nfa = NodeGraph(s0, s1)
-        self.end_state.add(s1)
-        nfa_stack.append(nfa)
+    #     nfa = NodeGraph(s0, s1)
+    #     self.end_state.add(s1)
+    #     nfa_stack.append(nfa)
 
 
     def addstate(self, state, state_set): 

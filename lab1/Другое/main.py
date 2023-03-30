@@ -11,6 +11,8 @@ def build(p):
         return None 
 
     nfa = NFA()
+    for i in tokens:
+        print(i)   
     nfa.build(tokens)
     
     nfa.print_graph()
