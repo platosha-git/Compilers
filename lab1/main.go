@@ -2,20 +2,20 @@ package main
 
 import (
 	"fmt"
+	. "lab1/nfa"
 	. "lab1/parser"
 )
 
 func main() {
-	regular := ""
-	fmt.Scan(&regular)
+	inputString := ""
+	fmt.Scan(&inputString)
 
 	var parser Parser
-	tokens := parser.Parse([]rune(regular))
-	fmt.Println(tokens)
+	regularString := parser.Parse([]rune(inputString))
 
 	//1. По регулярному выражению построить НКА
-	//var nfa NFA
-	//nfa.Build(tokens)
-	//nfa.Output()
+	var nfa NFA
+	nfa.Build(regularString)
+	nfa.Output()
 
 }
