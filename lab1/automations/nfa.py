@@ -97,7 +97,7 @@ class NFA:
         self.addNode(s0, s1)
 
 
-# Helper functions fot handlers
+# Helper functions for handlers
     def addNode(self, start, end):
         newNode = NodeGraph(start, end)
         
@@ -134,36 +134,31 @@ class NFA:
             ind += 1
 
 
+#Functions for modeling by terminal string
+    def model(self, string):
+        curStates = set()
+        self.addState(self.startState.start, curStates)
+        
+        for symbol in string:
+            next_states = set()
+            for state in curStates:
+                if symbol in state.transitions.keys():
+                    trans_state = state.transitions[symbol]
+                    self.addState(trans_state, next_states)
+           
+            curStates = next_states
 
+        for s in curStates:
+            if s.isEnd:
+                return True
+        return False
 
-
-
-    def addstate(self, state, state_set): 
+    def addState(self, state, state_set): 
         if state in state_set:
             return
         state_set.add(state)
         for eps in state.epsilon:
-            self.addstate(eps, state_set)
+            self.addState(eps, state_set)
 
-    def match(self,s):
-        if not self.startState:
-            print('Build before please')
-            return
-        
-        current_states = set()
-        self.addstate(self.startState.start, current_states)
-        
-        for c in s:
-            next_states = set()
-            for state in current_states:
-                if c in state.transitions.keys():
-                    trans_state = state.transitions[c]
-                    self.addstate(trans_state, next_states)
-           
-            current_states = next_states
-
-        for s in current_states:
-            if s.isEnd:
-                return True
-        return False
+    
 

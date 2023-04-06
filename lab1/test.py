@@ -91,15 +91,15 @@ def test():
             expected = pattern_test_array[1]
             for string in string_array:
                 num_tests += 1
-                res = dfa.match(string)
+                res = dfa.model(string)
                 if res != expected:
                     error = True
                     print('[Error dfa]', 'pattern = ', test['pattern'], '; string = ', string, '; res = ', res, '; expected = ', expected)
-                res = nfa.match(string)
+                res = nfa.model(string)
                 if res != expected:
                     error = True
                     print('[Error nfa]', 'pattern = ', test['pattern'], '; string = ', string, '; res = ', res, '; expected = ', expected)
-                res = dfa_min.match(string)
+                res = dfa_min.model(string)
                 if res != expected:
                     error = True
                     print('[Error dfa_min]', 'pattern = ', test['pattern'], '; string = ', string, '; res = ', res, '; expected = ', expected)

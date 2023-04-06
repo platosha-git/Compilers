@@ -22,7 +22,19 @@ def main():
     dfa = DFA(nfa)
     dfa.Build()
     dfa.Output()
-        
+    print()
+
+    #3. По ДКА построить наименьший КА
+    dfa.minimization()
+    dfa.Output()  
+    print()
+
+    #4. Моделировать минимальный КА для входной цепочки
+    #terminalString = input()
+    terminalString = "babb"
+    result = dfa.model(terminalString)
+    print("result: ", result)
+
 
 if __name__ == "__main__":
     main()

@@ -16,56 +16,68 @@ class DFA:
 
 
     def Build(self):
-        union_state_array = []
-        new_transition_array = []
-        index_state_array = 0
+        epsilonClosure = list(self.defineClosure(self.startState))
+        
+        unionStates = []
+        unionStates.append(set(epsilonClosure))
 
-        epsilon_closure = list(self.get_epsilon_closure(self.startState))
-        union_state_array.append(set(epsilon_closure))
+        idx = 0
+        newTransitions = []
 
-        while index_state_array < len(union_state_array):
-            transition = {char: [] for char in self.alphabet}
-            epsilon_closure = list(union_state_array[index_state_array])
+        while idx < len(unionStates):
+            newTransition = {char: [] for char in self.alphabet}
+            epsilonClosure = list(unionStates[idx])
 
-            for i in range(len(epsilon_closure)): # переходы по символам алфавита в эпсилон окрестности
-                for char, value in epsilon_closure[i].transitions.items():
-                    transition[char].append(value)
-            for char, value in transition.items(): # добавление новых состояний в таблицу
+            for i in range(len(epsilonClosure)):
+                for char, value in epsilonClosure[i].transitions.items():
+                    newTransition[char].append(value)
+
+            for char, value in newTransition.items():
                 if len(value) == 0:
                     continue
                 
-                new_state = []
+                newState = []
                 for i in range(len(value)):
-                    epsilon_closure = list(self.get_epsilon_closure(value[i]))
-                    new_state.extend(epsilon_closure)
+                    epsilonClosure = list(self.defineClosure(value[i]))
+                    newState.extend(epsilonClosure)
 
-                transition[char] = new_state
-                if set(new_state) not in union_state_array:
-                    union_state_array.append(set(new_state))
+                newTransition[char] = newState
+                if set(newState) not in unionStates:
+                    unionStates.append(set(newState))
 
 
-            new_transition_array.append(transition)
-            index_state_array += 1
+            newTransitions.append(newTransition)
+            idx += 1
         
-        res_state_array = [State('s' + str(i)) for i in range(len(union_state_array))]
+        resStates = [State('s' + str(i)) for i in range(len(unionStates))]
         
-        for i in range(len(union_state_array)):
-            if not self.finalStates.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].isEnd = True
+        self.correctExtremeStates(unionStates, resStates)
+        self.defineTransitions(newTransitions, unionStates, resStates)
+        self.defineStartStates(resStates)
 
-            if not self.startStates.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].isStart = True
 
-        for i in range(len(new_transition_array)):
-            for char, union_state in new_transition_array[i].items():
+    def correctExtremeStates(self, unionStates, resStates):
+        for i in range(len(unionStates)):
+            if not self.finalStates.isdisjoint(unionStates[i]):
+                resStates[i].isEnd = True
+
+            if not self.startStates.isdisjoint(unionStates[i]):
+                resStates[i].isStart = True
+
+
+    def defineTransitions(self, newTransitions, unionStates, resStates):
+        for i in range(len(newTransitions)):
+            for char, union_state in newTransitions[i].items():
                 if len(union_state) == 0:
                     continue
-                index_of_state = union_state_array.index(set(union_state))
-                res_state_array[i].transitions[char] = res_state_array[index_of_state]
-                
-        for i in range(len(res_state_array)):
-            if res_state_array[i].isStart:
-                self.startStatesSet.add(res_state_array[i])
+                index_of_state = unionStates.index(set(union_state))
+                resStates[i].transitions[char] = resStates[index_of_state]
+
+
+    def defineStartStates(self, resStates):
+        for i in range(len(resStates)):
+            if resStates[i].isStart:
+                self.startStatesSet.add(resStates[i])
 
 
     def Output(self):
@@ -84,17 +96,19 @@ class DFA:
                 print()
             current_states = next_states
 
-    def _get_epsilon_closure_recur(self, state, epsilon_closure):
-        if state in epsilon_closure:
-                return
-        epsilon_closure.add(state)
-        for eps in state.epsilon:
-            self._get_epsilon_closure_recur(eps, epsilon_closure)
 
-    def get_epsilon_closure(self, state):
-        epsilon_closure = set()
-        self._get_epsilon_closure_recur(state, epsilon_closure)
-        return epsilon_closure
+    def defineClosureRecur(self, state, epsilonClosure):
+        if state in epsilonClosure:
+                return
+        epsilonClosure.add(state)
+        for eps in state.epsilon:
+            self.defineClosureRecur(eps, epsilonClosure)
+
+
+    def defineClosure(self, state):
+        epsilonClosure = set()
+        self.defineClosureRecur(state, epsilonClosure)
+        return epsilonClosure
 
 
 
@@ -190,7 +204,7 @@ class DFA:
                         st.transitions[char] = keep_state
  
 
-    def match(self,s):
+    def model(self,s):
         if not self.startStatesSet:
             print('Build before please')
             return
