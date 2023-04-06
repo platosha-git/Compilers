@@ -1,0 +1,16 @@
+digraph G {
+rankdir = LR;
+"s7" -> "s5"[label="epsilon"];
+"s7" -> "s8"[label="epsilon"];
+"s5" -> "s1"[label="epsilon"];
+"s5" -> "s3"[label="epsilon"];
+"s8" -> "s10"[label="a"];
+"s1" -> "s2"[label="a"];
+"s3" -> "s4"[label="b"];
+"s10" -> "s12"[label="b"];
+"s2" -> "s6"[label="epsilon"];
+"s4" -> "s6"[label="epsilon"];
+"s12" -> "s14"[label="b"];
+"s6" -> "s8"[label="epsilon"];
+"s6" -> "s5"[label="epsilon"];
+}

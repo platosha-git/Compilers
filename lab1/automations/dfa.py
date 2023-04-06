@@ -117,9 +117,8 @@ class DFA:
         file.write("}\n")
         file.close()
 
-        cmdStr = "dot -Tpng " + step + ".gv -o" + step + ".png"
-        print(cmdStr)
-        os.system(cmdStr)
+        os.system("dot -Tpng " + step + ".gv -o" + step + ".png")
+        os.system("xdg-open " + step + ".png")
 
     def _get_inv(self):
         inv = {}
@@ -154,11 +153,13 @@ class DFA:
         p = [f, not_f]
         queue = []
         class_ = {}
+
         for i in range(len(p)):
             for char in self.alphabet:
                 queue.append([i, char])
             for state in p[i]:
                 class_[state] = i
+        
         while len(queue) > 0:
             c, a = queue.pop()
             involved = {}

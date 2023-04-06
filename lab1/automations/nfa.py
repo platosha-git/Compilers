@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.append('./base')
 
@@ -132,6 +133,36 @@ class NFA:
             print()
 
             ind += 1
+
+    def OutputGraph(self, step):
+        file = open(step + ".gv", "w")
+        file.write("digraph G {\nrankdir = LR;\n")
+
+        ind = 0
+        state_array = []
+        state_array.append(self.startState.start)
+        while ind < len(state_array):
+            current_state = state_array[ind]
+
+            for eps_state in current_state.epsilon:
+                transStr = '"' + str(current_state) + '"' + " -> " + '"' + str(eps_state) + '"[label="epsilon"];\n'
+                file.write(transStr)
+                if eps_state not in state_array:
+                    state_array.append(eps_state)
+                    
+            for char, state in current_state.transitions.items():
+                transStr = '"' + str(current_state) + '"' + " -> " + '"' + str(state) + '"[label="' + str(char) + '"];\n'
+                file.write(transStr)
+                if state not in state_array:
+                    state_array.append(state)
+
+            ind += 1
+
+        file.write("}\n")
+        file.close()
+
+        os.system("dot -Tpng " + step + ".gv -o" + step + ".png")
+        os.system("xdg-open " + step + ".png")
 
 
 #Functions for modeling by terminal string

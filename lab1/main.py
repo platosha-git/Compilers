@@ -7,7 +7,7 @@ from nfa import NFA
 from dfa import DFA
 
 def main():
-    #inputString = input()
+    #inputString = input("Enter regular string: ")
     inputString = "(a|b)*abb"
 
     parser = Parser()
@@ -22,18 +22,16 @@ def main():
     dfa = DFA(nfa)
     dfa.Build()
     dfa.OutputGraph('2')
-    print()
 
     #3. По ДКА построить наименьший КА
     dfa.minimize()
     dfa.OutputGraph('3')  
-    print()
 
     #4. Моделировать минимальный КА для входной цепочки
-    #terminalString = input()
-    terminalString = "babb"
+    terminalString = input("Enter terminal string: ")
+    #terminalString = "babb"
     result = dfa.model(terminalString)
-    print("result: ", result)
+    print("Result: ", result)
 
 
 if __name__ == "__main__":
