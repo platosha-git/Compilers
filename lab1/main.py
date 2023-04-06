@@ -1,6 +1,10 @@
+import sys
+sys.path.append('./parser')
+sys.path.append('./automations')
+
 from parse import Parser 
 from nfa import NFA
-from automata import DFA
+from dfa import DFA
 
 def main():
     #inputString = input()
@@ -15,8 +19,8 @@ def main():
     nfa.Output()
 
     #2. По НКА построить эквивалентный ДКА
-    dfa = DFA()
-    dfa.Build(nfa)
+    dfa = DFA(nfa)
+    dfa.Build()
     dfa.Output()
         
 

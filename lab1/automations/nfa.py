@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./base')
+
 from state import State
 from graph import NodeGraph
 

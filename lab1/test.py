@@ -1,6 +1,10 @@
+import sys
+sys.path.append('./parser')
+sys.path.append('./automations')
+
 from parse import Parser 
 from nfa import NFA
-from automata import DFA
+from dfa import DFA
 from copy import deepcopy
 
 
@@ -11,8 +15,8 @@ def build(p):
     nfa = NFA()
     nfa.Build(tokens)
 
-    dfa = DFA()
-    dfa.Build(nfa)
+    dfa = DFA(nfa)
+    dfa.Build()
     dfa_min = deepcopy(dfa)
     dfa_min.minimization()
     

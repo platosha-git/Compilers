@@ -2,14 +2,74 @@ from state import State
 from graph import NodeGraph
 
 class DFA:
-    def __init__(self):
-        self.start = None
-        self.end = None 
-        self.alphabet = []
-        self.start_state = set()
+    def __init__(self, nfa): 
+        self.states = nfa.states
+        self.numberOfStates = nfa.numberOfStates
+
+        self.startState = nfa.startState.start
+        self.startStatesSet = set()
+
+        self.startStates = set([nfa.startState.start])
+        self.finalStates = nfa.finalStates
+
+        self.alphabet = nfa.alphabet
+
+
+    def Build(self):
+        union_state_array = []
+        new_transition_array = []
+        index_state_array = 0
+
+        epsilon_closure = list(self.get_epsilon_closure(self.startState))
+        union_state_array.append(set(epsilon_closure))
+
+        while index_state_array < len(union_state_array):
+            transition = {char: [] for char in self.alphabet}
+            epsilon_closure = list(union_state_array[index_state_array])
+
+            for i in range(len(epsilon_closure)): # переходы по символам алфавита в эпсилон окрестности
+                for char, value in epsilon_closure[i].transitions.items():
+                    transition[char].append(value)
+            for char, value in transition.items(): # добавление новых состояний в таблицу
+                if len(value) == 0:
+                    continue
+                
+                new_state = []
+                for i in range(len(value)):
+                    epsilon_closure = list(self.get_epsilon_closure(value[i]))
+                    new_state.extend(epsilon_closure)
+
+                transition[char] = new_state
+                if set(new_state) not in union_state_array:
+                    union_state_array.append(set(new_state))
+
+
+            new_transition_array.append(transition)
+            index_state_array += 1
+        
+        res_state_array = [State('s' + str(i)) for i in range(len(union_state_array))]
+        
+        for i in range(len(union_state_array)):
+            if not self.finalStates.isdisjoint(union_state_array[i]): # имеют пересечение
+                res_state_array[i].isEnd = True
+
+            if not self.startStates.isdisjoint(union_state_array[i]): # имеют пересечение
+                res_state_array[i].isStart = True
+
+        for i in range(len(new_transition_array)):
+            for char, union_state in new_transition_array[i].items():
+                if len(union_state) == 0:
+                    continue
+                index_of_state = union_state_array.index(set(union_state))
+                res_state_array[i].transitions[char] = res_state_array[index_of_state]
+                
+        for i in range(len(res_state_array)):
+            if res_state_array[i].isStart:
+                self.startStatesSet.add(res_state_array[i])
+
 
     def Output(self):
-        current_states = self.start_state
+        current_states = self.startStatesSet
         used_states = set()
         while current_states != set():
             next_states = set()
@@ -36,75 +96,12 @@ class DFA:
         self._get_epsilon_closure_recur(state, epsilon_closure)
         return epsilon_closure
 
-    def Build(self, nfa):
 
-        end_state_set = nfa.finalStates
-        start_state_set = set([nfa.startState.start])
-
-        start_state = nfa.startState.start
-        self.alphabet = nfa.alphabet
-
-        union_state_array = []
-        new_transition_array = []
-        index_state_array = 0
-
-        
-        epsilon_closure = list(self.get_epsilon_closure(start_state))
-        union_state_array.append(set(epsilon_closure))
-
-        while index_state_array < len(union_state_array):
-            transition = {char: [] for char in self.alphabet}
-            epsilon_closure = list(union_state_array[index_state_array])
-
-            for i in range(len(epsilon_closure)): # переходы по символам алфавита в эпсилон окрестности
-                for char, value in epsilon_closure[i].transitions.items():
-                    print("eps=", value)
-                    transition[char].append(value)
-            for char, value in transition.items(): # добавление новых состояний в таблицу
-                if len(value) == 0:
-                    continue
-                
-                new_state = []
-                for i in range(len(value)):
-                    print("val=", value[i])
-                    epsilon_closure = list(self.get_epsilon_closure(value[i]))
-                    new_state.extend(epsilon_closure)
-
-                print('new state')
-                for k in new_state:
-                    print(k, end='')
-                print('\n')
-                transition[char] = new_state
-                if set(new_state) not in union_state_array:
-                    union_state_array.append(set(new_state))
-
-
-            new_transition_array.append(transition)
-            index_state_array += 1
-        
-        res_state_array = [State('s' + str(i)) for i in range(len(union_state_array))]
-        for i in range(len(union_state_array)):
-            if not end_state_set.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].isEnd = True
-
-            if not start_state_set.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].isStart = True
-
-        for i in range(len(new_transition_array)):
-            for char, union_state in new_transition_array[i].items():
-                if len(union_state) == 0:
-                    continue
-                index_of_state = union_state_array.index(set(union_state))
-                res_state_array[i].transitions[char] = res_state_array[index_of_state]
-                
-        for i in range(len(res_state_array)):
-            if res_state_array[i].isStart:
-                self.start_state.add(res_state_array[i])
 
     def _get_inv(self):
         inv = {}
 
-        current_states = self.start_state
+        current_states = self.startStatesSet
         used_states = set()
         while current_states != set():
             next_states = set()
@@ -123,7 +120,7 @@ class DFA:
         return inv, list(used_states)
 
     def minimization(self):
-        if not self.start_state:
+        if not self.startStatesSet:
             print('Build before please')
             return
 
@@ -194,11 +191,11 @@ class DFA:
  
 
     def match(self,s):
-        if not self.start_state:
+        if not self.startStatesSet:
             print('Build before please')
             return
         
-        current_states = self.start_state
+        current_states = self.startStatesSet
         for c in s:
             next_states = set()
             for state in current_states:
