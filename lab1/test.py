@@ -1,6 +1,6 @@
-
 from parse import Parser 
-from automata import NFA, DFA
+from nfa import NFA
+from automata import DFA
 from copy import deepcopy
 
 

@@ -1,23 +1,6 @@
+from state import State
+from graph import NodeGraph
 
-class State:
-    def __init__(self, name):
-        self.epsilon = [] 
-        self.transitions = {} 
-        self.name = name
-        self.is_end = False
-        self.is_start = False
-
-    def __str__(self):
-        return self.name 
-
-class NodeGraph:
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end 
-        end.is_end = True   
-
-# http://neerc.ifmo.ru/wiki/index.php?title=Построение_по_НКА_эквивалентного_ДКА,_алгоритм_Томпсона
-# http://neerc.ifmo.ru/wiki/index.php?title=Минимизация_ДКА,_алгоритм_Хопкрофта_(сложность_O(n_log_n))
 class DFA:
     def __init__(self):
         self.start = None
@@ -55,10 +38,10 @@ class DFA:
 
     def Build(self, nfa):
 
-        end_state_set = nfa.end_state
-        start_state_set = set([nfa.nfa_head.start])
+        end_state_set = nfa.finalStates
+        start_state_set = set([nfa.startState.start])
 
-        start_state = nfa.nfa_head.start
+        start_state = nfa.startState.start
         self.alphabet = nfa.alphabet
 
         union_state_array = []
@@ -102,10 +85,10 @@ class DFA:
         res_state_array = [State('s' + str(i)) for i in range(len(union_state_array))]
         for i in range(len(union_state_array)):
             if not end_state_set.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].is_end = True
+                res_state_array[i].isEnd = True
 
             if not start_state_set.isdisjoint(union_state_array[i]): # имеют пересечение
-                res_state_array[i].is_start = True
+                res_state_array[i].isStart = True
 
         for i in range(len(new_transition_array)):
             for char, union_state in new_transition_array[i].items():
@@ -115,7 +98,7 @@ class DFA:
                 res_state_array[i].transitions[char] = res_state_array[index_of_state]
                 
         for i in range(len(res_state_array)):
-            if res_state_array[i].is_start:
+            if res_state_array[i].isStart:
                 self.start_state.add(res_state_array[i])
 
     def _get_inv(self):
@@ -148,7 +131,7 @@ class DFA:
 
         f = set(); not_f = set()
         for state in used_states:
-            if state.is_end:
+            if state.isEnd:
                 f.add(state)
             else:
                 not_f.add(state)
@@ -195,11 +178,11 @@ class DFA:
 
             keep_state = similar_state_arr[0]
             for q in similar_state_arr:
-                if q.is_start and q.is_end:
+                if q.isStart and q.isEnd:
                     keep_state = q
                     break
 
-                if q.is_start or q.is_end:
+                if q.isStart or q.isEnd:
                     keep_state = q    
 
             for q in similar_state_arr:
@@ -226,149 +209,6 @@ class DFA:
             current_states = next_states
 
         for s in current_states:
-            if s.is_end:
+            if s.isEnd:
                 return True
         return False
-
-# https://en.wikipedia.org/wiki/Thompson%27s_construction
-class NFA:
-    def __init__(self):
-        self.alphabet = []
-        self.nfa_stack = []
-        self.state_count = 0
-        
-        self.nfa_head = None
-        self.end_state = set()
-
-    def Output(self):
-        ind = 0
-        state_array = []
-        state_array.append(self.nfa_head.start)
-        while ind < len(state_array):
-            current_state = state_array[ind]
-            print(ind, ')', 'from:', current_state)
-            print('by epsilon to:', end=' ')
-            for eps_state in current_state.epsilon:
-                print(eps_state, end=' ')
-                if eps_state not in state_array:
-                    state_array.append(eps_state)
-                    
-            print()
-            for char, state in current_state.transitions.items():
-                print('by', char, 'to', state, end = ' ')
-                if state not in state_array:
-                    state_array.append(state)
-            
-            print()
-
-            ind += 1
-
-    def Build(self, tokens):
-        char_set = set()
-        for t in tokens:
-            if t.desc == 'CHAR':
-                self.handle_char(t, self.nfa_stack)
-                char_set.add(t.value)
-            elif t.desc == 'CONCAT':
-                self.handle_concat(t, self.nfa_stack)
-            elif t.desc == 'OR':
-                self.handle_or(t, self.nfa_stack)
-            elif t.desc == 'STAR':
-                self.handle_star(t, self.nfa_stack)
-                            
-        self.alphabet = list(char_set)
-        self.nfa_head = self.nfa_stack.pop()
-
-    def create_state(self):
-        self.state_count += 1
-        return State('s' + str(self.state_count))
-    
-    def handle_char(self, t, nfa_stack):
-        s0 = self.create_state()
-        s1 = self.create_state()
-        s0.transitions[t.value] = s1
-        nfa = NodeGraph(s0, s1)
-        self.end_state.add(s1)
-        nfa_stack.append(nfa)
-
-      
-    def handle_concat(self, t, nfa_stack):
-        n2 = nfa_stack.pop()
-        n1 = nfa_stack.pop()
-        n1.end.is_end = False
-        if n1.end in self.end_state:
-            self.end_state.remove( n1.end)
-
-        n1.end.epsilon = n2.start.epsilon # new
-        n1.end.transitions = n2.start.transitions 
-
-        nfa = NodeGraph(n1.start, n2.end)
-        self.end_state.add(n2.end)
-        nfa_stack.append(nfa)
-
-     
-    def handle_or(self, t, nfa_stack):
-        n2 = nfa_stack.pop()
-        n1 = nfa_stack.pop()
-        s0 = self.create_state()
-        s0.epsilon = [n1.start, n2.start]
-        s3 = self.create_state()
-        n1.end.epsilon.append(s3)
-        n2.end.epsilon.append(s3)
-        n1.end.is_end = False
-        n2.end.is_end = False
-        if n1.end in self.end_state:
-            self.end_state.remove(n1.end)
-        if n2.end in self.end_state:
-            self.end_state.remove(n2.end)
-
-        nfa = NodeGraph(s0, s3)
-        self.end_state.add(s3)
-
-        nfa_stack.append(nfa)
-    
-    def handle_star(self, t, nfa_stack):
-        n1 = nfa_stack.pop()
-        s0 = self.create_state()
-        s1 = self.create_state()
-        s0.epsilon = [n1.start]
-        s0.epsilon.append(s1)
-        n1.end.epsilon.extend([s1, n1.start])
-        n1.end.is_end = False
-        if n1.end in self.end_state:
-            self.end_state.remove(n1.end)
-
-        nfa = NodeGraph(s0, s1)
-        self.end_state.add(s1)
-        nfa_stack.append(nfa)
-
-
-    def addstate(self, state, state_set): 
-        if state in state_set:
-            return
-        state_set.add(state)
-        for eps in state.epsilon:
-            self.addstate(eps, state_set)
-
-    def match(self,s):
-        if not self.nfa_head:
-            print('Build before please')
-            return
-        
-        current_states = set()
-        self.addstate(self.nfa_head.start, current_states)
-        
-        for c in s:
-            next_states = set()
-            for state in current_states:
-                if c in state.transitions.keys():
-                    trans_state = state.transitions[c]
-                    self.addstate(trans_state, next_states)
-           
-            current_states = next_states
-
-        for s in current_states:
-            if s.is_end:
-                return True
-        return False
-
