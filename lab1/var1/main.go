@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
-	. "lab1/nfa"
+	. "lab1/automations/dfa"
+	. "lab1/automations/nfa"
 	. "lab1/parser"
 )
 
 func main() {
-	inputString := ""
-	fmt.Scan(&inputString)
+	inputString := "(a|b)*abb"
+	// fmt.Scan(&inputString)
 
 	var parser Parser
 	regularString := parser.Parse([]rune(inputString))
@@ -18,4 +18,7 @@ func main() {
 	nfa.Build(regularString)
 	nfa.Output()
 
+	var dfa DFA
+	dfa.Build(nfa)
+	dfa.Output()
 }

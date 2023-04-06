@@ -9,18 +9,18 @@ import (
 
 type NFA struct {
 	states         Stack
-	chStates       ChangedStates
+	ChStates       ChangedStates
 	numberOfStates int
 
-	startState  NodeGraph
-	finalStates map[string]bool
+	StartState  NodeGraph
+	FinalStates map[string]bool
 
-	alphabet []string
+	Alphabet []string
 }
 
 func (nfa *NFA) Build(regular []Symbol) {
 	charSet := make(map[string]bool)
-	nfa.finalStates = make(map[string]bool)
+	nfa.FinalStates = make(map[string]bool)
 
 	for i := 0; i < len(regular); i++ {
 		curSymbol := regular[i]
@@ -39,7 +39,7 @@ func (nfa *NFA) Build(regular []Symbol) {
 	}
 
 	nfa.initAlphabet(charSet)
-	nfa.states, nfa.startState = nfa.states.Pop()
+	nfa.states, nfa.StartState = nfa.states.Pop()
 }
 
 func (nfa *NFA) handleChar(symbol Symbol) {
@@ -57,10 +57,10 @@ func (nfa *NFA) handleConcat() {
 	nfa.states, n1 = nfa.states.Pop()
 
 	n1.IsEnd = false
-	nfa.finalStates[n1.End.Name] = false
+	nfa.FinalStates[n1.End.Name] = false
 
-	nfa.chStates.NameConcat = append(nfa.chStates.NameConcat, n1.End.Name)
-	nfa.chStates.StateConcat = append(nfa.chStates.StateConcat, n2.Start)
+	nfa.ChStates.NameConcat = append(nfa.ChStates.NameConcat, n1.End.Name)
+	nfa.ChStates.StateConcat = append(nfa.ChStates.StateConcat, n2.Start)
 
 	nfa.addNode(n1.Start, n2.End)
 }
@@ -78,11 +78,11 @@ func (nfa *NFA) handleOr() {
 	n1.End.IsEnd = false
 	n2.End.IsEnd = false
 
-	nfa.finalStates[n1.End.Name] = false
-	nfa.finalStates[n2.End.Name] = false
+	nfa.FinalStates[n1.End.Name] = false
+	nfa.FinalStates[n2.End.Name] = false
 
-	nfa.chStates.NameOr = append(nfa.chStates.NameOr, n1.End.Name, n2.End.Name)
-	nfa.chStates.StateOr = append(nfa.chStates.StateOr, s3, s3)
+	nfa.ChStates.NameOr = append(nfa.ChStates.NameOr, n1.End.Name, n2.End.Name)
+	nfa.ChStates.StateOr = append(nfa.ChStates.StateOr, s3, s3)
 
 	nfa.addNode(s0, s3)
 }
@@ -97,10 +97,10 @@ func (nfa *NFA) handleStar() {
 	s0.Epsilon = append(s0.Epsilon, n1.Start, s1)
 
 	n1.End.IsEnd = false
-	nfa.finalStates[n1.End.Name] = false
+	nfa.FinalStates[n1.End.Name] = false
 
-	nfa.chStates.NameStar = append(nfa.chStates.NameStar, n1.End.Name)
-	nfa.chStates.StateStar = append(nfa.chStates.StateStar, s1, n1.Start)
+	nfa.ChStates.NameStar = append(nfa.ChStates.NameStar, n1.End.Name)
+	nfa.ChStates.StateStar = append(nfa.ChStates.StateStar, s1, n1.Start)
 
 	nfa.addNode(s0, s1)
 }
@@ -109,14 +109,14 @@ func (nfa *NFA) handleStar() {
 func (nfa *NFA) addNode(start State, end State) {
 	newNode := NodeGraph{Start: start, End: end, IsEnd: true}
 
-	nfa.finalStates[end.Name] = true
+	nfa.FinalStates[end.Name] = true
 	nfa.states = nfa.states.Push(newNode)
 }
 
 func (nfa *NFA) initAlphabet(charSet map[string]bool) {
 	for key, value := range charSet {
 		if value == true {
-			nfa.alphabet = append(nfa.alphabet, key)
+			nfa.Alphabet = append(nfa.Alphabet, key)
 		}
 	}
 }
@@ -131,51 +131,27 @@ func (nfa *NFA) createState() State {
 	return newState
 }
 
-func idxInStateArray(st State, stArr []State) int {
-	idxToRemove := -1
-	for i := 0; i < len(stArr); i++ {
-		if stArr[i].Name == st.Name {
-			idxToRemove = i
-			break
-		}
-	}
-
-	return idxToRemove
-}
-
-func idxInStringArray(name string, nameArray []string) int {
-	idxInArray := -1
-	for i := 0; i < len(nameArray); i++ {
-		if nameArray[i] == name {
-			idxInArray = i
-			break
-		}
-	}
-
-	return idxInArray
-}
-
 func (nfa *NFA) Output() {
 	var stateArr []State
-	stateArr = append(stateArr, nfa.startState.Start)
+	stateArr = append(stateArr, nfa.StartState.Start)
 
 	for i := 0; i < len(stateArr); i++ {
 		curState := stateArr[i]
 
-		idx := idxInStringArray(curState.Name, nfa.chStates.NameConcat)
+		idx := IdxInStringArray(curState.Name, nfa.ChStates.NameConcat)
 		if idx >= 0 {
-			curState.Epsilon = nfa.chStates.StateConcat[idx].Epsilon
-			curState.Transitions = nfa.chStates.StateConcat[idx].Transitions
+			curState.Epsilon = nfa.ChStates.StateConcat[idx].Epsilon
+			curState.Transitions = nfa.ChStates.StateConcat[idx].Transitions
 		}
 
-		idx = idxInStringArray(curState.Name, nfa.chStates.NameOr)
+		idx = IdxInStringArray(curState.Name, nfa.ChStates.NameOr)
 		if idx >= 0 {
-			curState.Epsilon = append(curState.Epsilon, nfa.chStates.StateOr[idx])
+			curState.Epsilon = append(curState.Epsilon, nfa.ChStates.StateOr[idx])
 		}
 
-		idx = idxInStringArray(curState.Name, nfa.chStates.NameStar)
+		idx = IdxInStringArray(curState.Name, nfa.ChStates.NameStar)
 		if idx >= 0 {
-			curState.Epsilon = append(curState.Epsilon, nfa.chStates.StateStar[2*idx], nfa.chStates.StateStar[2*idx+1])
+			curState.Epsilon = append(curState.Epsilon, nfa.ChStates.StateStar[2*idx], nfa.ChStates.StateStar[2*idx+1])
 		}
 
 		fmt.Println(i, ") from:", curState.Name)
@@ -185,7 +161,7 @@ func (nfa *NFA) Output() {
 			epsState := curState.Epsilon[i]
 			fmt.Print(epsState.Name + " ")
 
-			idx := idxInStateArray(epsState, stateArr)
+			idx := IdxInStateArray(epsState, stateArr)
 			if idx < 0 {
 				stateArr = append(stateArr, epsState)
 			}
@@ -195,7 +171,7 @@ func (nfa *NFA) Output() {
 		for key, value := range curState.Transitions {
 			fmt.Println("by ", key, " to ", value.Name)
 
-			idx := idxInStateArray(value, stateArr)
+			idx := IdxInStateArray(value, stateArr)
 			if idx < 0 {
 				stateArr = append(stateArr, value)
 			}
