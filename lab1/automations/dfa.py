@@ -1,3 +1,4 @@
+import os
 from state import State
 from graph import NodeGraph
 
@@ -80,23 +81,7 @@ class DFA:
                 self.startStatesSet.add(resStates[i])
 
 
-    def Output(self):
-        current_states = self.startStatesSet
-        used_states = set()
-        while current_states != set():
-            next_states = set()
-            for state in current_states:
-                used_states.add(state)
-                print(state, end = '-> ')
-                for key, value in state.transitions.items():
-                    print(key, end = ': ')
-                    print(value, end = ' ')
-                    if value not in used_states:
-                        next_states.add(value)
-                print()
-            current_states = next_states
-
-
+#Helper functions for build cycle
     def defineClosureRecur(self, state, epsilonClosure):
         if state in epsilonClosure:
                 return
@@ -111,6 +96,30 @@ class DFA:
         return epsilonClosure
 
 
+    def OutputGraph(self, step):
+        file = open(step + ".gv", "w")
+        file.write("digraph G {\nrankdir = LR;\n")
+
+        curStates = self.startStatesSet
+        usedStates = set()
+        while curStates != set():
+            nextStates = set()
+            
+            for state in curStates:
+                usedStates.add(state)
+                for key, value in state.transitions.items():
+                    transStr = '"' + str(state) + '"' + " -> " + '"' + str(value) + '"[label="' + str(key) + '"];\n'
+                    file.write(transStr)
+                    if value not in usedStates:
+                        nextStates.add(value)
+            curStates = nextStates
+
+        file.write("}\n")
+        file.close()
+
+        cmdStr = "dot -Tpng " + step + ".gv -o" + step + ".png"
+        print(cmdStr)
+        os.system(cmdStr)
 
     def _get_inv(self):
         inv = {}
@@ -133,11 +142,7 @@ class DFA:
 
         return inv, list(used_states)
 
-    def minimization(self):
-        if not self.startStatesSet:
-            print('Build before please')
-            return
-
+    def minimize(self):
         inv, used_states = self._get_inv()
 
         f = set(); not_f = set()
@@ -204,22 +209,20 @@ class DFA:
                         st.transitions[char] = keep_state
  
 
-    def model(self,s):
-        if not self.startStatesSet:
-            print('Build before please')
-            return
+#Functions for modeling by terminal string
+    def model(self, string):
+        curStates = self.startStatesSet
         
-        current_states = self.startStatesSet
-        for c in s:
-            next_states = set()
-            for state in current_states:
-                if c in state.transitions.keys():
-                    trans_state = state.transitions[c]
-                    next_states.add(trans_state)
-           
-            current_states = next_states
+        for symbol in string:
+            nextStates = set()
 
-        for s in current_states:
-            if s.isEnd:
+            for state in curStates:
+                if symbol in state.transitions.keys():
+                    nextStates.add(state.transitions[symbol])
+           
+            curStates = nextStates
+
+        for state in curStates:
+            if state.isEnd:
                 return True
         return False

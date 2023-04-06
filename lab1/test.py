@@ -18,7 +18,7 @@ def build(p):
     dfa = DFA(nfa)
     dfa.Build()
     dfa_min = deepcopy(dfa)
-    dfa_min.minimization()
+    dfa_min.minimize()
     
     return nfa, dfa, dfa_min
 
