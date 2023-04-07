@@ -120,94 +120,126 @@ class DFA:
         os.system("dot -Tpng " + step + ".gv -o" + step + ".png")
         os.system("xdg-open " + step + ".png")
 
-    def _get_inv(self):
+
+#Minimizations functions
+    def minimize(self):
+        inv, states = self.getStates()
+
+        f, notF = self.firstReverse(states)
+        
+        rStates = [f, notF]
+        queue, dStates = self.firstDetermine(rStates)
+        
+        self.secondReverse(rStates, inv, queue, dStates)
+        self.secondDetermine(rStates, inv)
+
+        
+    def getStates(self):
         inv = {}
 
         current_states = self.startStatesSet
-        used_states = set()
+        usedStates = set()
+
         while current_states != set():
             next_states = set()
+
             for state in current_states:
-                used_states.add(state)
+                usedStates.add(state)
+                
                 for c in state.transitions.keys():
                     trans_state = state.transitions[c]
                     
                     if trans_state not in inv:
                         inv[trans_state] = {char: [] for char in self.alphabet}
+                    
                     inv[trans_state][c].append(state)
-                    if trans_state not in used_states:
+                    
+                    if trans_state not in usedStates:
                         next_states.add(trans_state)
+            
             current_states = next_states
+        return inv, list(usedStates)
 
-        return inv, list(used_states)
 
-    def minimize(self):
-        inv, used_states = self._get_inv()
-
-        f = set(); not_f = set()
-        for state in used_states:
+    def firstReverse(self, usedStates):
+        f = set(); notF = set()
+        for state in usedStates:
             if state.isEnd:
                 f.add(state)
             else:
-                not_f.add(state)
-        p = [f, not_f]
-        queue = []
-        class_ = {}
+                notF.add(state)
 
-        for i in range(len(p)):
+        return f, notF
+
+
+    def firstDetermine(self, rStates):
+        queue = []
+        dStates = {}
+
+        for i in range(len(rStates)):
             for char in self.alphabet:
                 queue.append([i, char])
-            for state in p[i]:
-                class_[state] = i
-        
+            for state in rStates[i]:
+                dStates[state] = i
+
+        return queue, dStates
+
+
+    def secondReverse(self, rStates, inv, queue, dStates):
         while len(queue) > 0:
             c, a = queue.pop()
             involved = {}
-            for q in p[c]:
+
+            for q in rStates[c]:
                 if q not in inv:
                     continue
                 for r in inv[q][a]:
-                    i = class_[r]
+                    i = dStates[r]
+                    
                     if i not in involved:
                         involved[i] = set()
                     involved[i].add(r)
             
             for i in involved:
-                if len(list(involved[i])) < len(list(p[i])):
-                    p.append(set())
-                    j = len(p) - 1
+                if len(list(involved[i])) < len(list(rStates[i])):
+                    rStates.append(set())
+                    j = len(rStates) - 1
+                    
                     for r in involved[i]:
-                        p[i].remove(r)
-                        p[j].add(r)
-                    if len(list(p[j])) > len(list(p[i])):
-                        p[j], p[i] = p[i], p[j]
+                        rStates[i].remove(r)
+                        rStates[j].add(r)
+                    
+                    if len(list(rStates[j])) > len(list(rStates[i])):
+                        rStates[j], rStates[i] = rStates[i], rStates[j]
 
-                    for r in p[j]:
-                        class_[r] = j
+                    for r in rStates[j]:
+                        dStates[r] = j
 
                     for char in self.alphabet:
                         queue.append([j, char])
-    
-        for i in range(len(p)):
-            similar_state_arr = list(p[i])
-            if len(similar_state_arr) <= 1:
+
+
+    def secondDetermine(self, rStates, inv):
+        for i in range(len(rStates)):
+            similarStates = list(rStates[i])
+            if len(similarStates) <= 1:
                 continue
 
-            keep_state = similar_state_arr[0]
-            for q in similar_state_arr:
+            keepState = similarStates[0]
+            for q in similarStates:
                 if q.isStart and q.isEnd:
-                    keep_state = q
+                    keepState = q
                     break
 
                 if q.isStart or q.isEnd:
-                    keep_state = q    
+                    keepState = q    
 
-            for q in similar_state_arr:
-                if q == keep_state:
+            for q in similarStates:
+                if q == keepState:
                     continue            
                 for char in inv[q]:
                     for st in inv[q][char]:
-                        st.transitions[char] = keep_state
+                        st.transitions[char] = keepState
  
 
 #Functions for modeling by terminal string

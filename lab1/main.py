@@ -28,8 +28,8 @@ def main():
     dfa.OutputGraph('3')  
 
     #4. Моделировать минимальный КА для входной цепочки
-    terminalString = input("Enter terminal string: ")
-    #terminalString = "babb"
+    #terminalString = input("Enter terminal string: ")
+    terminalString = "babb"
     result = dfa.model(terminalString)
     print("Result: ", result)
 
