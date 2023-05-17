@@ -1,7 +1,7 @@
-from lab2 import elimination_of_recursion_indirect, \
+from interface import elimination_of_recursion_indirect, \
                  elimination_of_recursion_immediate_1, \
                  remove_unattainable_symbols, \
-                 left_factorization
+                 eliminationLeftRecursion
 
 def compare_grammatics(grammatic1, grammatic2):
     res = set(grammatic1['nonterminal']) != set(grammatic2['nonterminal']) or \
@@ -495,7 +495,7 @@ def test_left_factorization():
         failed_flag = False
         grammatic = test['grammatic']
         expected_grammatic = test['expected']
-        left_factorization_grammatic = left_factorization(grammatic)
+        left_factorization_grammatic = eliminationLeftRecursion(grammatic)
         
         if compare_grammatics(expected_grammatic, left_factorization_grammatic):
            print('Failed in test_left_factorization \nexpected:', expected_grammatic, '\nget:', left_factorization_grammatic)
