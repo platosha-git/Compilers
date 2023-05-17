@@ -23,7 +23,7 @@ def main():
     dfa.Build()
     dfa.OutputGraph('2')
 
-    #3. По ДКА построить наименьший КА
+    #3. По ДКА построить наименьший КА (алгоритм Бржозовского)
     dfa.minimize()
     dfa.OutputGraph('3')  
 
