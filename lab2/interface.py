@@ -150,9 +150,10 @@ def remove_unattainable_symbols(grammatic):
 		new_grammatic['rules'] = rules
 		return new_grammatic
 
-def get_longest_prefix(production):
+
+def getLongestPrefix(rules):
 		production_string_array = []
-		for p in production:
+		for p in rules:
 				s = ''
 				for i in range(len(p)):
 						s += p[i] + '|'
@@ -180,47 +181,44 @@ def get_longest_prefix(production):
 
 		return max_prefix_arr
 
-# Алгоритм 4.10 из книги АХО А.В, ЛАМ М.С., СЕТИ Р., УЛЬМАН Дж.Д. Компиляторы: принципы, технологии и инструменты. – М.: Вильямс, 2008
-def eliminationLeftRecursion(grammatic):
-		rules = {}
-		symbol_epsilon_dict = {}
 
-		for symbol, production in grammatic['rules'].items():
-				symbol_epsilon_dict[symbol] = False
+def eliminationLeftRecursion(grammar):
+		rules, epsilon = {}, {}
 
-				prefix = get_longest_prefix(production)
+		for symbol, rule in grammar['rules'].items():
+				epsilon[symbol] = False
+
+				prefix = getLongestPrefix(rule)
 				if len(prefix) == 0:
 						continue
 
-				new_symbol = symbol
-
+				newSymbol = symbol
 				while len(prefix) > 0:
-						new_symbol += '1'
+						newSymbol += '1'
 
-						beta_arr = []
-						gamma_arr = []
-
-						for p in production:
+						betaArr, gammaArr = [], []
+						for p in rule:
 								if prefix == p[:len(prefix)]:
 										beta = p[len(prefix):]
 										if len(beta) > 0:
-												beta_arr.append(beta)
+												betaArr.append(beta)
 										else:
-												symbol_epsilon_dict[new_symbol] = True
+												epsilon[newSymbol] = True
 								else:
-										gamma_arr.append(p)
+										gammaArr.append(p)
 
-						grammatic['nterm'].append(new_symbol)
+						grammar['nterm'].append(newSymbol)
 
-						rules[symbol] = [prefix + [new_symbol]] + gamma_arr
-						rules[new_symbol] = beta_arr
+						rules[symbol] = [prefix + [newSymbol]] + gammaArr
+						rules[newSymbol] = betaArr
 
 						production = rules[symbol]
-						prefix = get_longest_prefix(production)
+						prefix = getLongestPrefix(production)
 
 		for symbol in rules:
-				grammatic['rules'][symbol] = rules[symbol]
-				if symbol in symbol_epsilon_dict and symbol_epsilon_dict[symbol]:
-						grammatic['rules'][symbol].append(['eps'])
-		return grammatic
+				grammar['rules'][symbol] = rules[symbol]
+				if symbol in epsilon and epsilon[symbol]:
+						grammar['rules'][symbol].append(['eps'])
+
+		return grammar
 
