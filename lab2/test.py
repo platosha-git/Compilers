@@ -4,9 +4,9 @@ from interface import elimination_of_recursion_indirect, \
                  eliminationLeftRecursion
 
 def compare_grammatics(grammatic1, grammatic2):
-    res = set(grammatic1['nonterminal']) != set(grammatic2['nonterminal']) or \
-           set(grammatic1['terminal']) != set(grammatic2['terminal']) or \
-           grammatic1['startsymbol'] != grammatic2['startsymbol'] or \
+    res = set(grammatic1['nterm']) != set(grammatic2['nterm']) or \
+           set(grammatic1['term']) != set(grammatic2['term']) or \
+           grammatic1['start'] != grammatic2['start'] or \
            grammatic1['rules'] != grammatic2['rules']
 
     return res
@@ -17,18 +17,18 @@ def test_remove_immediate_recursion():
         # 2.27
         {
             'grammatic':{ 
-                            'nonterminal': ['E', 'T', 'F'], 
-                            'terminal': ['+', '*', '(', ')', 'a'], 
-                            'startsymbol': 'E', 
+                            'nterm': ['E', 'T', 'F'],
+                            'term': ['+', '*', '(', ')', 'a'],
+                            'start': 'E',
                             'rules': {
                                     'E': [['E', '+', 'T'], ['T']], 
                                     'T': [['T', '*', 'F'], ['F']], 
                                     'F': [['(', 'E', ')'], ['a']]}
                         },
             'expected': { 
-                            'nonterminal': ['E', 'T', 'F', 'E1', 'T1'], 
-                            'terminal': ['+', '*', '(', ')', 'a'], 
-                            'startsymbol': 'E', 
+                            'nterm': ['E', 'T', 'F', 'E1', 'T1'],
+                            'term': ['+', '*', '(', ')', 'a'],
+                            'start': 'E',
                             'rules': {
                                     'E': [['T'], ['T', 'E1']],
                                     'E1': [['+', 'T'], ['+', 'T', 'E1']],
@@ -39,17 +39,17 @@ def test_remove_immediate_recursion():
         },  
         {
             'grammatic':{ 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
@@ -57,17 +57,17 @@ def test_remove_immediate_recursion():
         },    
         {
             'grammatic':{ 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'S1'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'S1'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S1']],
                                     'S1': [['a'], ['a', 'S1']]
@@ -98,17 +98,17 @@ def test_remove_indirect_recursion():
         # https://neerc.ifmo.ru/wiki/index.php?title=Устранение_левой_рекурсии
         {
             'grammatic':{ 
-                            'nonterminal': ['A', 'S'], 
-                            'terminal': ['a', 'b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S'],
+                            'term': ['a', 'b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S', 'A1', 'S1'], 
-                            'terminal': ['a', 'b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'A1', 'S1'],
+                            'term': ['a', 'b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a', 'A1']], 
                                     'A1': [['a', 'A1'], ['eps']], 
@@ -119,17 +119,17 @@ def test_remove_indirect_recursion():
         # https://neerc.ifmo.ru/wiki/index.php?title=Устранение_левой_рекурсии
         {
             'grammatic':{
-                            'nonterminal': ['A', 'S'], 
-                            'terminal': ['a', 'b', 'y'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S'],
+                            'term': ['a', 'b', 'y'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a']], 
                                     'S': [['S', 'b'], ['S', 'a', 'y'], ['b']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S', 'S1'], 
-                            'terminal': ['a', 'b', 'y'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'S1'],
+                            'term': ['a', 'b', 'y'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a']], 
                                     'S': [['b', 'S1']],
@@ -139,18 +139,18 @@ def test_remove_indirect_recursion():
         # 4.7
         {
             'grammatic':{ 
-                            'nonterminal': ['E', 'T', 'F'], 
-                            'terminal': ['+', '*', '(', ')', 'a'], 
-                            'startsymbol': 'E', 
+                            'nterm': ['E', 'T', 'F'],
+                            'term': ['+', '*', '(', ')', 'a'],
+                            'start': 'E',
                             'rules': {
                                     'E': [['E', '+', 'T'], ['T']], 
                                     'T': [['T', '*', 'F'], ['F']], 
                                     'F': [['a'], ['(', 'E', ')']]}
                         },
             'expected': { 
-                            'nonterminal': ['E', 'T', 'F', 'E1', 'T1'], 
-                            'terminal': ['+', '*', '(', ')', 'a'], 
-                            'startsymbol': 'E', 
+                            'nterm': ['E', 'T', 'F', 'E1', 'T1'],
+                            'term': ['+', '*', '(', ')', 'a'],
+                            'start': 'E',
                             'rules': {
                                     'E': [['T', 'E1']],
                                     'E1': [['+', 'T', 'E1'], ['eps']],
@@ -162,17 +162,17 @@ def test_remove_indirect_recursion():
         # 4.9
         {
             'grammatic':{
-                            'nonterminal': ['S', 'A'], 
-                            'terminal': ['a', 'b', 'c', 'd'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'A'],
+                            'term': ['a', 'b', 'c', 'd'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['A', 'a'], ['b']], 
                                     'A': [['A', 'c'], ['S', 'd'], ['eps']]}
                         },
             'expected': {
-                            'nonterminal': ['S', 'A', 'A1'], 
-                            'terminal': ['a', 'b', 'c', 'd'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'A', 'A1'],
+                            'term': ['a', 'b', 'c', 'd'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['A', 'a'], ['b']], 
                                     'A': [['b', 'd', 'A1'], ['A1']],
@@ -181,17 +181,17 @@ def test_remove_indirect_recursion():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
@@ -199,17 +199,17 @@ def test_remove_indirect_recursion():
         },    
         {
             'grammatic':{ 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'S1'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'S1'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S1']],
                                     'S1': [['a', 'S1'], ['eps']]
@@ -218,9 +218,9 @@ def test_remove_indirect_recursion():
         },    
         {
             'grammatic':{ 
-                            'nonterminal': ['A, B, C, D'], 
-                            'terminal': ['a, b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A, B, C, D'],
+                            'term': ['a, b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['B', 'A']],
                                     'B': [['C', 'b', 'A'], ['B', 'a', 'B'], ['eps']],
@@ -228,9 +228,9 @@ def test_remove_indirect_recursion():
                             }
                         },
             'expected': { 
-                            'nonterminal': ['A, B, C, D', 'B1', 'C1'], 
-                            'terminal': ['a, b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A, B, C, D', 'B1', 'C1'],
+                            'term': ['a, b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['B', 'A']],
                                     'B': [['C', 'b', 'A', 'B1'], ['B1']],
@@ -262,18 +262,18 @@ def test_remove_unattainable_symbols():
     test_arr = [
         {
             'grammatic':{ 
-                            'nonterminal': ['A', 'S', 'F'], 
-                            'terminal': ['a', 'b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'F'],
+                            'term': ['a', 'b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']], 
                                     'F': [['A', 'a'], ['S', 'b']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S'], 
-                            'terminal': ['a', 'b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S'],
+                            'term': ['a', 'b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']]}
@@ -281,18 +281,18 @@ def test_remove_unattainable_symbols():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['A', 'S', 'F'], 
-                            'terminal': ['a', 'b', 'n', 't'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'F'],
+                            'term': ['a', 'b', 'n', 't'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']], 
                                     'F': [['A', 'n'], ['S', 't']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S'], 
-                            'terminal': ['a', 'b'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S'],
+                            'term': ['a', 'b'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']]}
@@ -300,9 +300,9 @@ def test_remove_unattainable_symbols():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['A', 'S', 'F', 'F2', 'F3'], 
-                            'terminal': ['a', 'b', 'n', 't'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'F', 'F2', 'F3'],
+                            'term': ['a', 'b', 'n', 't'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a']], 
                                     'S': [['eps']],
@@ -311,9 +311,9 @@ def test_remove_unattainable_symbols():
                                     'F3': [['eps']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S'],
+                            'term': ['a'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a']], 
                                     'S': [['eps']]}
@@ -321,17 +321,17 @@ def test_remove_unattainable_symbols():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
@@ -339,17 +339,17 @@ def test_remove_unattainable_symbols():
         },    
         {
             'grammatic':{ 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
@@ -377,17 +377,17 @@ def test_left_factorization():
     test_arr = [
         {
             'grammatic':{ 
-                            'nonterminal': ['S', 'E'], 
-                            'terminal': ['i', 't', 'e', 'a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'E'],
+                            'term': ['i', 't', 'e', 'a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['i', 'E', 't', 'S'], ['i', 'E', 't', 'S', 'e', 'S'], ['a']], 
                                     'E': [['b']]}
                         },
             'expected': { 
-                            'nonterminal': ['S', 'E', 'S1'], 
-                            'terminal': ['i', 't', 'e', 'a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'E', 'S1'],
+                            'term': ['i', 't', 'e', 'a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['i', 'E', 't', 'S', 'S1'], ['a']], 
                                     'S1': [['e', 'S'], ['eps']],
@@ -396,17 +396,17 @@ def test_left_factorization():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['stmt', 'expr'], 
-                            'terminal': ['if', 'then', 'else'], 
-                            'startsymbol': 'stmt', 
+                            'nterm': ['stmt', 'expr'],
+                            'term': ['if', 'then', 'else'],
+                            'start': 'stmt',
                             'rules': {
                                     'stmt': [['if', 'expr', 'then', 'stmt', 'else', 'stmt'], ['if', 'expr', 'then', 'stmt']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['stmt', 'stmt1', 'expr'], 
-                            'terminal': ['if', 'then', 'else'],
-                            'startsymbol': 'stmt', 
+                            'nterm': ['stmt', 'stmt1', 'expr'],
+                            'term': ['if', 'then', 'else'],
+                            'start': 'stmt',
                             'rules': {
                                     'stmt': [['if', 'expr', 'then', 'stmt', 'stmt1']], 
                                     'stmt1': [['else', 'stmt'], ['eps']],
@@ -415,18 +415,18 @@ def test_left_factorization():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['A', 'S', 'F'], 
-                            'terminal': ['a', 'b', 'n', 't'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'F'],
+                            'term': ['a', 'b', 'n', 't'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']], 
                                     'F': [['A', 'n'], ['S', 't']]}
                         },
             'expected': { 
-                            'nonterminal': ['A', 'S', 'F'], 
-                            'terminal': ['a', 'b', 'n', 't'], 
-                            'startsymbol': 'A', 
+                            'nterm': ['A', 'S', 'F'],
+                            'term': ['a', 'b', 'n', 't'],
+                            'start': 'A',
                             'rules': {
                                     'A': [['S', 'a'], ['A', 'a']], 
                                     'S': [['A', 'b']], 
@@ -435,17 +435,17 @@ def test_left_factorization():
         },
         {
             'grammatic':{ 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'T'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'T'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['T', 'a']]
                             }
@@ -453,17 +453,17 @@ def test_left_factorization():
         },    
         {
             'grammatic':{ 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a']]
                             }
@@ -471,17 +471,17 @@ def test_left_factorization():
         },   
         {
             'grammatic':{ 
-                            'nonterminal': ['S'], 
-                            'terminal': ['a', 'b', 'c'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S'],
+                            'term': ['a', 'b', 'c'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'a'], ['S', 'b'], ['S', 'c']]
                             }
                         },
             'expected': { 
-                            'nonterminal': ['S', 'S1'], 
-                            'terminal': ['a', 'b', 'c'], 
-                            'startsymbol': 'S', 
+                            'nterm': ['S', 'S1'],
+                            'term': ['a', 'b', 'c'],
+                            'start': 'S',
                             'rules': {
                                     'S': [['S', 'S1']],
                                     'S1': [['a'], ['b'], ['c']]

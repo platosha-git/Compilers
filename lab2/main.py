@@ -1,10 +1,9 @@
-from parser import parse
-from handlers import  outputGrammar
+from handlers import  inputGrammar, outputGrammar
 from interface import eliminationLeftRecursion
 
 def main():
 		filenameGrammar = 'gr_lf.txt'
-		inGrammar = parse(filenameGrammar)
+		inGrammar = inputGrammar(filenameGrammar)
 
 		outputGrammar('Grammar', inGrammar)
 

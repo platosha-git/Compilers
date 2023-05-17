@@ -1,7 +1,7 @@
 # Алгоритм 2.13 из книги АХО А., УЛЬМАН Дж. Теория синтаксического анализа, перевода и компиляции: В 2-х томах. Т.1.: Синтаксический анализ. - М.: Мир, 1978.
 def elimination_of_recursion_immediate_1(grammatic):
 		new_rules = grammatic['rules'].copy()
-		new_nonterminal = set(grammatic['nonterminal'])
+		new_nonterminal = set(grammatic['nterm'])
 
 		for left, right in grammatic['rules'].items():
 				add_index = 1
@@ -34,7 +34,7 @@ def elimination_of_recursion_immediate_1(grammatic):
 
 
 		grammatic['rules'] = new_rules
-		grammatic['nonterminal'] = list(new_nonterminal)
+		grammatic['nterm'] = list(new_nonterminal)
 		return grammatic
 
 # Алгоритм 4.8 из книги АХО А.В, ЛАМ М.С., СЕТИ Р., УЛЬМАН Дж.Д. Компиляторы: принципы, технологии и инструменты. – М.: Вильямс, 2008
@@ -82,7 +82,7 @@ def elimination_of_recursion_immediate_2(rules):
 def elimination_of_recursion_indirect(grammatic):
 		rules = grammatic['rules']
 		nonterminal = list(rules.keys())
-		new_nonterminal_arr = grammatic['nonterminal'].copy()
+		new_nonterminal_arr = grammatic['nterm'].copy()
 		# print(nonterminal)
 		for i in range(len(nonterminal)):
 				Ai = nonterminal[i]
@@ -113,15 +113,15 @@ def elimination_of_recursion_indirect(grammatic):
 						rules[a] = new_rules[a]
 
 		grammatic['rules'] = rules
-		grammatic['nonterminal'] = new_nonterminal_arr
+		grammatic['nterm'] = new_nonterminal_arr
 		return grammatic
 
 
 # Алгоритм 2.8 АХО А., УЛЬМАН Дж. Теория синтаксического анализа, перевода и компиляции: В 2-х томах. Т.1.: Синтаксический анализ. - М.: Мир, 1978.
 def remove_unattainable_symbols(grammatic):
-		nonterminal = set(grammatic['nonterminal'])
+		nonterminal = set(grammatic['nterm'])
 		V_pred = set()
-		V_next = set([grammatic['startsymbol']])
+		V_next = set([grammatic['start']])
 		while V_next != V_pred:
 				V_pred, V_next = V_next, V_pred
 				for symbol, production in grammatic['rules'].items():
@@ -133,8 +133,8 @@ def remove_unattainable_symbols(grammatic):
 				V_next |= V_pred
 
 		new_grammatic = {}
-		new_grammatic['nonterminal'] = list(nonterminal.intersection(V_next))
-		new_grammatic['startsymbol'] = grammatic['startsymbol']
+		new_grammatic['nterm'] = list(nonterminal.intersection(V_next))
+		new_grammatic['start'] = grammatic['start']
 		terminal = set()
 		rules = {}
 		for symbol, production in grammatic['rules'].items():
@@ -146,7 +146,7 @@ def remove_unattainable_symbols(grammatic):
 												terminal.add(p[i])
 
 
-		new_grammatic['terminal'] = list(terminal)
+		new_grammatic['term'] = list(terminal)
 		new_grammatic['rules'] = rules
 		return new_grammatic
 
@@ -210,7 +210,7 @@ def eliminationLeftRecursion(grammatic):
 								else:
 										gamma_arr.append(p)
 
-						grammatic['nonterminal'].append(new_symbol)
+						grammatic['nterm'].append(new_symbol)
 
 						rules[symbol] = [prefix + [new_symbol]] + gamma_arr
 						rules[new_symbol] = beta_arr
