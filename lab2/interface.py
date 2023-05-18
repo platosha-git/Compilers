@@ -225,102 +225,26 @@ def eliminationLeftRecursion(grammar):
 
 		return grammar
 
-def get_subsets(symbols):
-    """
-    Возвращает все подмножества множества symbols.
-    """
-    subsets = [[]]
-    for symbol in symbols:
-        subsets += [subset + [symbol] for subset in subsets]
-    return subsets
+def eliminationUselessSymbs(grammar):
+		new_nterms = set(grammar['start'])
+		print(new_nterms)
 
-def eliminationEpsilonRules(tx):
-		grammar = [
-				("S", ["A", "B", "C", "d"]),
-				("A", ["a"]),
-				("A", ["epsilon"]),
-				("B", ["A", "C"]),
-				("C", ["c"]),
-				("C", ["epsilon"]),
-		]
+		for symbol, rule in grammar['rules'].items():
+				if symbol not in new_nterms:
+						continue
+				for p in rule:
+						for i in range(len(p)):
+								if p[i] in grammar['term']:
+										continue
+								new_nterms.add(p[i])
+				print(new_nterms)
 
-		nullable = set()
-		for head, body in grammar:
-				if not body:
-						nullable.add(head)
+		rules = {}
+		for symbol, rule in grammar['rules'].items():
+				if symbol in new_nterms:
+						rules[symbol] = rule
 
-		# Пока мы можем найти нетерминалы, которые могут выводить эпсилон, заменяем эпсилон-правила
-		while True:
-				new_nullable = set(nullable)
-				for head, body in grammar:
-						if all(symbol in nullable for symbol in body):
-								new_nullable.add(head)
-				if new_nullable == nullable:
-						break
-				nullable = new_nullable
+		print(rules)
+		grammar['rules'] = rules
 
-		# Создаем новую грамматику без эпсилон-правил
-		new_grammar = []
-		for head, body in grammar:
-				for subset in get_subsets(body):
-						if all(symbol in nullable or symbol == "" for symbol in subset):
-								new_body = [symbol for symbol in body if symbol not in subset]
-								if not new_body:
-										new_body = [""]  # заменяем пустое тело на символ эпсилон
-								new_grammar.append((head, new_body))
-
-		print(new_grammar)
-		return new_grammar
-
-def cnf_grammer(G):
-    # step 1
-    S = G.start()
-    P = G.productions()
-    N = set(G.nonterminals())
-    T = set(G.terminals())
-    new_S = S.symbol() + "'"
-    while new_S in N:
-        new_S += "'"
-    P.append(new_S + " -> " + S.symbol())
-    N.add(new_S)
-
-    # step 2
-    for p in P:
-        if len(p.rhs()) > 1:
-            rhs = p.rhs()
-            new_rhs = []
-            for s in rhs:
-                if s in T:
-                    new_rhs.append(s)
-                else:
-                    new_s = s.symbol() + "_"
-                    while new_s in N:
-                        new_s += "_"
-                    N.add(new_s)
-                    new_rhs.append(new_s)
-                    P.append(new_s + " -> " + s.symbol())
-            P.remove(p)
-            new_p = p.lhs().symbol() + " -> " + "".join(new_rhs)
-            P.append(new_p)
-
-    # step 3
-    for p in P:
-        if len(p.rhs()) > 2:
-            rhs = p.rhs()
-            new_rhs = [rhs[0]]
-            for s in rhs[1:]:
-                new_s = s.symbol() + "_"
-                while new_s in N:
-                    new_s += "_"
-                N.add(new_s)
-                P.append(new_s + " -> " + s.symbol())
-                new_rhs.append(new_s)
-            P.remove(p)
-            new_p = p.lhs().symbol() + " -> " + new_rhs[0].symbol() + " " + new_rhs[1].symbol()
-            for s in new_rhs[2:]:
-                new_p += " " + s.symbol()
-            P.append(new_p)
-
-    # return new grammar
-    new_G = CFG(S, T, P, new_S)
-    return new_G
+		return grammar
