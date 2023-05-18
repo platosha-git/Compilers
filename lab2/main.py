@@ -1,15 +1,36 @@
 from handlers import  inputGrammar, outputGrammar
 from interface import eliminationLeftRecursion
+from interface import eliminationImmediateRecursion
+from interface import eliminationIndirectRecursion
 
 def main():
-		filenameGrammar = 'gr_lf.txt'
-		inGrammar = inputGrammar(filenameGrammar)
+		# 1. Устранение левой рекурсии
+		inLGr = inputGrammar('left.txt')
+		outputGrammar('Grammar', inLGr)
 
-		outputGrammar('Grammar', inGrammar)
+		outLGr = eliminationLeftRecursion(inLGr)
+		outputGrammar('Left recursion', outLGr)
 
-		#1. Устранение левой рекурсии
-		outGrammar = eliminationLeftRecursion(inGrammar)
-		outputGrammar('Left recursion', outGrammar)
+		# 2. Устранение непосредственной рекурсии
+		inImGr = inputGrammar('immediate.txt')
+		outputGrammar('Grammar', inImGr)
+
+		outImGr = eliminationImmediateRecursion(inImGr)
+		outputGrammar('Immediate recursion', outImGr)
+
+		# 3. Устранение косвенной рекурсии
+		inIGr = inputGrammar('indirect.txt')
+		outputGrammar('Grammar', inIGr)
+
+		outIGr = eliminationIndirectRecursion(inIGr)
+		outputGrammar('Indirect recursion', inIGr)
+
+		# 4. Удаление бесполезных символов
+		inUGr = inputGrammar('useless.txt')
+		# outputGrammar('EGrammar', inEGr)
+
+		#outEGr = eliminationEpsilonRules(inEGr)
+		# outputGrammar('Epsilon rules', outEGr)
 
 		# grammatic = elimination_of_recursion_immediate_1(grammar)
 		# grammatic = elimination_of_recursion_indirect(grammar)

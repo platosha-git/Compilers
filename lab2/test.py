@@ -1,5 +1,5 @@
-from interface import elimination_of_recursion_indirect, \
-                 elimination_of_recursion_immediate_1, \
+from interface import eliminationIndirectRecursion, \
+                 eliminationImmediateRecursion, \
                  remove_unattainable_symbols, \
                  eliminationLeftRecursion
 
@@ -81,7 +81,7 @@ def test_remove_immediate_recursion():
         failed_flag = False
         grammatic = test['grammatic']
         expected_grammatic = test['expected']
-        elimination_of_recursion_grammatic = elimination_of_recursion_immediate_1(grammatic)
+        elimination_of_recursion_grammatic = eliminationImmediateRecursion(grammatic)
         
         if compare_grammatics(expected_grammatic, elimination_of_recursion_grammatic):
            print('Failed in test_remove_immediate_recursion \nexpected:', expected_grammatic, '\nget:', elimination_of_recursion_grammatic)
@@ -247,7 +247,7 @@ def test_remove_indirect_recursion():
         failed_flag = False
         grammatic = test['grammatic']
         expected_grammatic = test['expected']
-        elimination_of_recursion_grammatic = elimination_of_recursion_indirect(grammatic)
+        elimination_of_recursion_grammatic = eliminationIndirectRecursion(grammatic)
         # elimination_of_recursion_grammatic = remove_unattainable_symbols(elimination_of_recursion_grammatic)    
         if compare_grammatics(expected_grammatic, elimination_of_recursion_grammatic):
            print('Failed in test_remove_indirect_recursion \nexpected:', expected_grammatic, '\nget:', elimination_of_recursion_grammatic)

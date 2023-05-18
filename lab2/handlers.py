@@ -36,16 +36,6 @@ def outputGrammar(msg, grammar):
 		print(msg)
 		print('---------------')
 
-		print('non terminal:', end=' ')
-		print(grammar['nterm'])
-
-		print('terminal:', end=' ')
-		print(grammar['term'])
-
-		print('start symbol:', end=' ')
-		print(grammar['start'])
-		print()
-
 		for symbol, production in grammar['rules'].items():
 				print(symbol, '->', end=' ')
 				for i in range(len(production)):

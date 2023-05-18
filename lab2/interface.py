@@ -1,5 +1,8 @@
 # Алгоритм 2.13 из книги АХО А., УЛЬМАН Дж. Теория синтаксического анализа, перевода и компиляции: В 2-х томах. Т.1.: Синтаксический анализ. - М.: Мир, 1978.
-def elimination_of_recursion_immediate_1(grammatic):
+from itertools import combinations
+
+
+def eliminationImmediateRecursion(grammatic):
 		new_rules = grammatic['rules'].copy()
 		new_nonterminal = set(grammatic['nterm'])
 
@@ -79,7 +82,7 @@ def elimination_of_recursion_immediate_2(rules):
 		return new_rules, new_nonterminal
 
 
-def elimination_of_recursion_indirect(grammatic):
+def eliminationIndirectRecursion(grammatic):
 		rules = grammatic['rules']
 		nonterminal = list(rules.keys())
 		new_nonterminal_arr = grammatic['nterm'].copy()
@@ -222,3 +225,102 @@ def eliminationLeftRecursion(grammar):
 
 		return grammar
 
+def get_subsets(symbols):
+    """
+    Возвращает все подмножества множества symbols.
+    """
+    subsets = [[]]
+    for symbol in symbols:
+        subsets += [subset + [symbol] for subset in subsets]
+    return subsets
+
+def eliminationEpsilonRules(tx):
+		grammar = [
+				("S", ["A", "B", "C", "d"]),
+				("A", ["a"]),
+				("A", ["epsilon"]),
+				("B", ["A", "C"]),
+				("C", ["c"]),
+				("C", ["epsilon"]),
+		]
+
+		nullable = set()
+		for head, body in grammar:
+				if not body:
+						nullable.add(head)
+
+		# Пока мы можем найти нетерминалы, которые могут выводить эпсилон, заменяем эпсилон-правила
+		while True:
+				new_nullable = set(nullable)
+				for head, body in grammar:
+						if all(symbol in nullable for symbol in body):
+								new_nullable.add(head)
+				if new_nullable == nullable:
+						break
+				nullable = new_nullable
+
+		# Создаем новую грамматику без эпсилон-правил
+		new_grammar = []
+		for head, body in grammar:
+				for subset in get_subsets(body):
+						if all(symbol in nullable or symbol == "" for symbol in subset):
+								new_body = [symbol for symbol in body if symbol not in subset]
+								if not new_body:
+										new_body = [""]  # заменяем пустое тело на символ эпсилон
+								new_grammar.append((head, new_body))
+
+		print(new_grammar)
+		return new_grammar
+
+def cnf_grammer(G):
+    # step 1
+    S = G.start()
+    P = G.productions()
+    N = set(G.nonterminals())
+    T = set(G.terminals())
+    new_S = S.symbol() + "'"
+    while new_S in N:
+        new_S += "'"
+    P.append(new_S + " -> " + S.symbol())
+    N.add(new_S)
+
+    # step 2
+    for p in P:
+        if len(p.rhs()) > 1:
+            rhs = p.rhs()
+            new_rhs = []
+            for s in rhs:
+                if s in T:
+                    new_rhs.append(s)
+                else:
+                    new_s = s.symbol() + "_"
+                    while new_s in N:
+                        new_s += "_"
+                    N.add(new_s)
+                    new_rhs.append(new_s)
+                    P.append(new_s + " -> " + s.symbol())
+            P.remove(p)
+            new_p = p.lhs().symbol() + " -> " + "".join(new_rhs)
+            P.append(new_p)
+
+    # step 3
+    for p in P:
+        if len(p.rhs()) > 2:
+            rhs = p.rhs()
+            new_rhs = [rhs[0]]
+            for s in rhs[1:]:
+                new_s = s.symbol() + "_"
+                while new_s in N:
+                    new_s += "_"
+                N.add(new_s)
+                P.append(new_s + " -> " + s.symbol())
+                new_rhs.append(new_s)
+            P.remove(p)
+            new_p = p.lhs().symbol() + " -> " + new_rhs[0].symbol() + " " + new_rhs[1].symbol()
+            for s in new_rhs[2:]:
+                new_p += " " + s.symbol()
+            P.append(new_p)
+
+    # return new grammar
+    new_G = CFG(S, T, P, new_S)
+    return new_G
