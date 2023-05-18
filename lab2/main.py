@@ -27,15 +27,12 @@ def main():
 		outputGrammar('Indirect recursion', inIGr)
 
 		# 4. Удаление бесполезных символов
-		inUGr = inputGrammar('useless.txt')
+		inUGr = inputGrammar('examples/useless.txt')
 		outputGrammar('Grammar', inUGr)
 
 		outUGr = eliminationUselessSymbs(inUGr)
 		outputGrammar('Useless symbols', outUGr)
 
-		# grammatic = elimination_of_recursion_immediate_1(grammar)
-		# grammatic = elimination_of_recursion_indirect(grammar)
-		# grammatic = remove_unattainable_symbols(grammar)
 
 if __name__ == "__main__":
 		main()
