@@ -1,3 +1,77 @@
+def getLongestPrefix(rules):
+		# 1 - Расположить нетерминалы в порядке
+		production_string_array = []
+		for p in rules:
+				s = ''
+				for i in range(len(p)):
+						s += p[i] + '|'
+				production_string_array.append(s)
+		production_string_array.sort()
+
+		max_prefix = ''
+		for i in range(len(production_string_array) - 1):
+				p1 = production_string_array[i]
+				p2 = production_string_array[i + 1]
+				prefix = ''
+
+				for j in range(min(len(p1), len(p2))):
+						if p1[j] == p2[j]:
+								prefix += p1[j]
+						else:
+								if len(prefix) > len(max_prefix):
+										max_prefix = prefix
+								prefix = ''
+								break
+				if len(prefix) > len(max_prefix):
+						max_prefix = prefix
+
+		max_prefix_arr = max_prefix.split('|')[:-1]
+
+		return max_prefix_arr
+
+
+def eliminationLeftRecursion(grammar):
+		rules, epsilon = {}, {}
+
+		for symbol, rule in grammar['rules'].items():
+				epsilon[symbol] = False
+
+
+				prefix = getLongestPrefix(rule)
+
+				if len(prefix) == 0:
+						continue
+
+				newSymbol = symbol
+				while len(prefix) > 0:
+						newSymbol += '1'
+
+						betaArr, gammaArr = [], []
+						for p in rule:
+								if prefix == p[:len(prefix)]:
+										beta = p[len(prefix):]
+										if len(beta) > 0:
+												betaArr.append(beta)
+										else:
+												epsilon[newSymbol] = True
+								else:
+										gammaArr.append(p)
+
+						grammar['nterm'].append(newSymbol)
+
+						rules[symbol] = [prefix + [newSymbol]] + gammaArr
+						rules[newSymbol] = betaArr
+
+						production = rules[symbol]
+						prefix = getLongestPrefix(production)
+
+		for symbol in rules:
+				grammar['rules'][symbol] = rules[symbol]
+				if symbol in epsilon and epsilon[symbol]:
+						grammar['rules'][symbol].append(['eps'])
+
+		return grammar
+
 def eliminationImmediateRecursion(grammatic):
 		new_rules = grammatic['rules'].copy()
 		new_nonterminal = set(grammatic['nterm'])
@@ -115,73 +189,3 @@ def eliminationIndirectRecursion(grammatic):
 		return grammatic
 
 
-def getLongestPrefix(rules):
-		production_string_array = []
-		for p in rules:
-				s = ''
-				for i in range(len(p)):
-						s += p[i] + '|'
-				production_string_array.append(s)
-		production_string_array.sort()
-
-		max_prefix = ''
-		for i in range(len(production_string_array) - 1):
-				p1 = production_string_array[i]
-				p2 = production_string_array[i + 1]
-				prefix = ''
-
-				for j in range(min(len(p1), len(p2))):
-						if p1[j] == p2[j]:
-								prefix += p1[j]
-						else:
-								if len(prefix) > len(max_prefix):
-										max_prefix = prefix
-								prefix = ''
-								break
-				if len(prefix) > len(max_prefix):
-						max_prefix = prefix
-
-		max_prefix_arr = max_prefix.split('|')[:-1]
-
-		return max_prefix_arr
-
-
-def eliminationLeftRecursion(grammar):
-		rules, epsilon = {}, {}
-
-		for symbol, rule in grammar['rules'].items():
-				epsilon[symbol] = False
-
-				prefix = getLongestPrefix(rule)
-				if len(prefix) == 0:
-						continue
-
-				newSymbol = symbol
-				while len(prefix) > 0:
-						newSymbol += '1'
-
-						betaArr, gammaArr = [], []
-						for p in rule:
-								if prefix == p[:len(prefix)]:
-										beta = p[len(prefix):]
-										if len(beta) > 0:
-												betaArr.append(beta)
-										else:
-												epsilon[newSymbol] = True
-								else:
-										gammaArr.append(p)
-
-						grammar['nterm'].append(newSymbol)
-
-						rules[symbol] = [prefix + [newSymbol]] + gammaArr
-						rules[newSymbol] = betaArr
-
-						production = rules[symbol]
-						prefix = getLongestPrefix(production)
-
-		for symbol in rules:
-				grammar['rules'][symbol] = rules[symbol]
-				if symbol in epsilon and epsilon[symbol]:
-						grammar['rules'][symbol].append(['eps'])
-
-		return grammar

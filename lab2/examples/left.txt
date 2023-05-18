@@ -1,0 +1,7 @@
+E E` T T` F
++ t eps * id ( )
+E -> T E`
+E` -> + t E` | eps
+T -> F T`
+T` -> * F T` | eps
+F -> (E) | id

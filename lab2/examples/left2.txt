@@ -1,0 +1,4 @@
+A
+a b c d eps
+A
+A -> A c | A a d | b d | eps

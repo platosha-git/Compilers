@@ -1,7 +1,8 @@
-from symbols import eliminationIndirectRecursion, \
-                 eliminationImmediateRecursion, \
-                 remove_unattainable_symbols, \
-                 eliminationLeftRecursion
+from handlers import  inputGrammar, outputGrammar
+from recursion import eliminationLeftRecursion
+from recursion import eliminationImmediateRecursion
+from recursion import eliminationIndirectRecursion
+from symbols import eliminationUselessSymbs
 
 def compare_grammatics(grammatic1, grammatic2):
     res = set(grammatic1['nterm']) != set(grammatic2['nterm']) or \
@@ -258,121 +259,6 @@ def test_remove_indirect_recursion():
         print('All passed in test_remove_indirect_recursion')
 
 
-def test_remove_unattainable_symbols():
-    test_arr = [
-        {
-            'grammatic':{ 
-                            'nterm': ['A', 'S', 'F'],
-                            'term': ['a', 'b'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a'], ['A', 'a']], 
-                                    'S': [['A', 'b']], 
-                                    'F': [['A', 'a'], ['S', 'b']]}
-                        },
-            'expected': { 
-                            'nterm': ['A', 'S'],
-                            'term': ['a', 'b'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a'], ['A', 'a']], 
-                                    'S': [['A', 'b']]}
-                        }
-        },
-        {
-            'grammatic':{ 
-                            'nterm': ['A', 'S', 'F'],
-                            'term': ['a', 'b', 'n', 't'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a'], ['A', 'a']], 
-                                    'S': [['A', 'b']], 
-                                    'F': [['A', 'n'], ['S', 't']]}
-                        },
-            'expected': { 
-                            'nterm': ['A', 'S'],
-                            'term': ['a', 'b'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a'], ['A', 'a']], 
-                                    'S': [['A', 'b']]}
-                        }
-        },
-        {
-            'grammatic':{ 
-                            'nterm': ['A', 'S', 'F', 'F2', 'F3'],
-                            'term': ['a', 'b', 'n', 't'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a']], 
-                                    'S': [['eps']],
-                                    'F': [['A', 'b']], 
-                                    'F2': [['A', 'n'], ['S', 't']],
-                                    'F3': [['eps']]}
-                        },
-            'expected': { 
-                            'nterm': ['A', 'S'],
-                            'term': ['a'],
-                            'start': 'A',
-                            'rules': {
-                                    'A': [['S', 'a']], 
-                                    'S': [['eps']]}
-                        }
-        },
-        {
-            'grammatic':{ 
-                            'nterm': ['S', 'T'],
-                            'term': ['a'],
-                            'start': 'S',
-                            'rules': {
-                                    'S': [['T', 'a']]
-                            }
-                        },
-            'expected': { 
-                            'nterm': ['S', 'T'],
-                            'term': ['a'],
-                            'start': 'S',
-                            'rules': {
-                                    'S': [['T', 'a']]
-                            }
-                        }
-        },    
-        {
-            'grammatic':{ 
-                            'nterm': ['S'],
-                            'term': ['a'],
-                            'start': 'S',
-                            'rules': {
-                                    'S': [['S', 'a']]
-                            }
-                        },
-            'expected': { 
-                            'nterm': ['S'],
-                            'term': ['a'],
-                            'start': 'S',
-                            'rules': {
-                                    'S': [['S', 'a']]
-                            }
-                        },
-        },   
-    ]
-
-    for test in test_arr:
-        failed_flag = False
-        grammatic = test['grammatic']
-        expected_grammatic = test['expected']
-        remove_unattainable_grammatic = remove_unattainable_symbols(grammatic)
-        
-        if compare_grammatics(expected_grammatic, remove_unattainable_grammatic):
-           print('Failed in test_remove_unattainable_symbols \nexpected:', expected_grammatic, '\nget:', remove_unattainable_grammatic)
-           failed_flag = True
-           break
-
-    if not failed_flag:
-        print('All passed in test_remove_unattainable_symbols')
-
-
-
 def test_left_factorization():
     test_arr = [
         {
@@ -508,7 +394,6 @@ def test_left_factorization():
 
 def test():
     test_remove_indirect_recursion()
-    test_remove_unattainable_symbols()
     test_remove_immediate_recursion()
     test_left_factorization()
 

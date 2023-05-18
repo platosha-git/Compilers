@@ -1,8 +1,0 @@
-S A B C
-a c d eps
-S
-S -> A B C d
-A -> a | eps
-B -> A C
-C -> c | eps
-
