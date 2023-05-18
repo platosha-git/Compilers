@@ -1,4 +1,4 @@
-from interface import eliminationIndirectRecursion, \
+from symbols import eliminationIndirectRecursion, \
                  eliminationImmediateRecursion, \
                  remove_unattainable_symbols, \
                  eliminationLeftRecursion

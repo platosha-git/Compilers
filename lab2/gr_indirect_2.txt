@@ -1,5 +1,0 @@
-A S
-a b y
-A
-A -> S a
-S -> S b | A y | b

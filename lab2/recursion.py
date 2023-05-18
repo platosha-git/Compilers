@@ -1,7 +1,3 @@
-# Алгоритм 2.13 из книги АХО А., УЛЬМАН Дж. Теория синтаксического анализа, перевода и компиляции: В 2-х томах. Т.1.: Синтаксический анализ. - М.: Мир, 1978.
-from itertools import combinations
-
-
 def eliminationImmediateRecursion(grammatic):
 		new_rules = grammatic['rules'].copy()
 		new_nonterminal = set(grammatic['nterm'])
@@ -35,10 +31,10 @@ def eliminationImmediateRecursion(grammatic):
 								new_rules[new_symbol].append(alpha[i])
 								new_rules[new_symbol].append(alpha[i] + [new_symbol])
 
-
 		grammatic['rules'] = new_rules
 		grammatic['nterm'] = list(new_nonterminal)
 		return grammatic
+
 
 # Алгоритм 4.8 из книги АХО А.В, ЛАМ М.С., СЕТИ Р., УЛЬМАН Дж.Д. Компиляторы: принципы, технологии и инструменты. – М.: Вильямс, 2008
 def elimination_of_recursion_immediate_2(rules):
@@ -67,7 +63,6 @@ def elimination_of_recursion_immediate_2(rules):
 						new_nonterminal.add(new_symbol)
 						new_rules[left] = []
 						new_rules[new_symbol] = []
-
 
 						for i in range(len(beta)):
 								symbol = beta[i]
@@ -118,40 +113,6 @@ def eliminationIndirectRecursion(grammatic):
 		grammatic['rules'] = rules
 		grammatic['nterm'] = new_nonterminal_arr
 		return grammatic
-
-
-# Алгоритм 2.8 АХО А., УЛЬМАН Дж. Теория синтаксического анализа, перевода и компиляции: В 2-х томах. Т.1.: Синтаксический анализ. - М.: Мир, 1978.
-def remove_unattainable_symbols(grammatic):
-		nonterminal = set(grammatic['nterm'])
-		V_pred = set()
-		V_next = set([grammatic['start']])
-		while V_next != V_pred:
-				V_pred, V_next = V_next, V_pred
-				for symbol, production in grammatic['rules'].items():
-						if symbol in V_pred:
-								for p in production:
-										for i in range(len(p)):
-												if p[i] in nonterminal:
-														V_next.add(p[i])
-				V_next |= V_pred
-
-		new_grammatic = {}
-		new_grammatic['nterm'] = list(nonterminal.intersection(V_next))
-		new_grammatic['start'] = grammatic['start']
-		terminal = set()
-		rules = {}
-		for symbol, production in grammatic['rules'].items():
-				if symbol in V_next:
-						rules[symbol] = production
-						for p in production:
-								for i in range(len(p)):
-										if p[i] not in nonterminal and p[i] != 'eps':
-												terminal.add(p[i])
-
-
-		new_grammatic['term'] = list(terminal)
-		new_grammatic['rules'] = rules
-		return new_grammatic
 
 
 def getLongestPrefix(rules):
@@ -222,29 +183,5 @@ def eliminationLeftRecursion(grammar):
 				grammar['rules'][symbol] = rules[symbol]
 				if symbol in epsilon and epsilon[symbol]:
 						grammar['rules'][symbol].append(['eps'])
-
-		return grammar
-
-def eliminationUselessSymbs(grammar):
-		new_nterms = set(grammar['start'])
-		print(new_nterms)
-
-		for symbol, rule in grammar['rules'].items():
-				if symbol not in new_nterms:
-						continue
-				for p in rule:
-						for i in range(len(p)):
-								if p[i] in grammar['term']:
-										continue
-								new_nterms.add(p[i])
-				print(new_nterms)
-
-		rules = {}
-		for symbol, rule in grammar['rules'].items():
-				if symbol in new_nterms:
-						rules[symbol] = rule
-
-		print(rules)
-		grammar['rules'] = rules
 
 		return grammar
