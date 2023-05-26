@@ -24,7 +24,7 @@ def main():
 		outputGrammar('Grammar', inIGr)
 
 		outIGr = eliminationIndirectRecursion(inIGr)
-		outputGrammar('Indirect recursion', inIGr)
+		outputGrammar('Indirect recursion', outIGr)
 
 		# 4. Удаление бесполезных символов
 		inUGr = inputGrammar('examples/useless.txt')
