@@ -36,9 +36,7 @@ def eliminationLeftRecursion(grammar):
 		for symbol, rule in grammar['rules'].items():
 				epsilon[symbol] = False
 
-
 				prefix = getLongestPrefix(rule)
-
 				if len(prefix) == 0:
 						continue
 
@@ -46,21 +44,21 @@ def eliminationLeftRecursion(grammar):
 				while len(prefix) > 0:
 						newSymbol += '1'
 
-						betaArr, gammaArr = [], []
+						alphaArr, bettaArr = [], []
 						for p in rule:
 								if prefix == p[:len(prefix)]:
-										beta = p[len(prefix):]
-										if len(beta) > 0:
-												betaArr.append(beta)
+										alpha = p[len(prefix):]
+										if len(alpha) > 0:
+												alphaArr.append(alpha)
 										else:
 												epsilon[newSymbol] = True
 								else:
-										gammaArr.append(p)
+										bettaArr.append(p)
 
 						grammar['nterm'].append(newSymbol)
 
-						rules[symbol] = [prefix + [newSymbol]] + gammaArr
-						rules[newSymbol] = betaArr
+						rules[symbol] = [prefix + [newSymbol]] + bettaArr
+						rules[newSymbol] = alphaArr
 
 						production = rules[symbol]
 						prefix = getLongestPrefix(production)
@@ -74,7 +72,7 @@ def eliminationLeftRecursion(grammar):
 
 def eliminationImmediateRecursion(grammatic):
 		new_rules = grammatic['rules'].copy()
-		new_nonterminal = set(grammatic['nterm'])
+		new_nonterm = set(grammatic['nterm'])
 
 		for left, right in grammatic['rules'].items():
 				add_index = 1
@@ -88,7 +86,7 @@ def eliminationImmediateRecursion(grammatic):
 
 				if len(alpha) > 0:
 						new_symbol = left + str(add_index)
-						new_nonterminal.add(new_symbol)
+						new_nonterm.add(new_symbol)
 						new_rules[left] = []
 						new_rules[new_symbol] = []
 						if len(beta) == 0:
@@ -106,13 +104,12 @@ def eliminationImmediateRecursion(grammatic):
 								new_rules[new_symbol].append(alpha[i] + [new_symbol])
 
 		grammatic['rules'] = new_rules
-		grammatic['nterm'] = list(new_nonterminal)
+		grammatic['nterm'] = list(new_nonterm)
 		return grammatic
 
 
 # Алгоритм 4.8 из книги АХО А.В, ЛАМ М.С., СЕТИ Р., УЛЬМАН Дж.Д. Компиляторы: принципы, технологии и инструменты. – М.: Вильямс, 2008
 def elimination_of_recursion_immediate_2(rules):
-		# print('rules = ', rules)
 		new_rules = rules.copy()
 		new_nonterminal = set()
 		epsilon = 'eps'
@@ -127,11 +124,8 @@ def elimination_of_recursion_immediate_2(rules):
 						else:
 								beta.append(right[i])
 
-				# print('alpha = ', alpha, 'beta = ', beta)
 				if len(beta) == 0:
 						beta.append([])
-				# print('alpha =', alpha)
-				# print('beta =', beta)
 				if len(alpha) > 0:
 						new_symbol = left + str(add_index)
 						new_nonterminal.add(new_symbol)
@@ -154,38 +148,37 @@ def elimination_of_recursion_immediate_2(rules):
 def eliminationIndirectRecursion(grammatic):
 		rules = grammatic['rules']
 		nonterminal = list(rules.keys())
-		new_nonterminal_arr = grammatic['nterm'].copy()
-		# print(nonterminal)
+		newNonterminal = grammatic['nterm'].copy()
+
 		for i in range(len(nonterminal)):
 				Ai = nonterminal[i]
 				for j in range(i):
-						ai_production_array = rules[Ai]
 						Aj = nonterminal[j]
-						aj_production_array = rules[Aj]
+						aiArray = rules[Ai]
+						ajArray = rules[Aj]
 
 						new_production_array = []
-
-						for k in range(len(ai_production_array)):
+						for k in range(len(aiArray)):
 								new_production = []
-								if ai_production_array[k][0] == Aj:
-										for aj_production in aj_production_array:
+								if aiArray[k][0] == Aj:
+										for aj_production in ajArray:
 												if aj_production[-1] == 'eps':
 														aj_production = aj_production[:-1]
-												new_production_array.append(aj_production + ai_production_array[k][1:])
+												new_production_array.append(aj_production + aiArray[k][1:])
 								else:
-										new_production.extend(ai_production_array[k])
+										new_production.extend(aiArray[k])
 
 								if len(new_production) > 0:
 										new_production_array.append(new_production)
 						rules[Ai] = new_production_array
-				# print('AAA')
+
 				new_rules, new_nonterminal = elimination_of_recursion_immediate_2({Ai: rules[Ai]})
-				new_nonterminal_arr += list(new_nonterminal)
+				newNonterminal += list(new_nonterminal)
 				for a in new_rules:
 						rules[a] = new_rules[a]
 
 		grammatic['rules'] = rules
-		grammatic['nterm'] = new_nonterminal_arr
+		grammatic['nterm'] = newNonterminal
 		return grammatic
 
 
