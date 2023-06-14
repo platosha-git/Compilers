@@ -1,8 +1,7 @@
 from exception import CompileError
 
-def parse(expression):
-        ast = AstTreeBuilder()
-        ast.build(expression)
+def parse(tokenized_expression):
+        Parser(tokenized_expression)
 
 class Node():
         def __init__(self, operations = None, nodes = None, is_leaf = False, node_name = 'NO_NAME'):
@@ -11,14 +10,15 @@ class Node():
                 self.is_leaf = is_leaf
                 self.node_name = node_name
     
-class AstTreeBuilder():
-        def __init__(self):
-                self.lexer = None
+class Parser():
+        def __init__(self, tokenized_expression):
+                self.tokenized_expression = tokenized_expression
                 self.root = Node()
                 self.operations_after_expression = {'OP_blockopenbrackets', 'OP_blockclosebrackets', 'OP_sep'}
                 self.count = {'f': 0, 'i': 0, 't': 0, 'ae': 0,
                                       'e': 0, 'o': 0, 'olt': 0,
                                       'ol': 0, 'b': 0, 'p': 0}
+                self.parse()
 
         def _get_name(self, name, op, val = None):
             new_name = name + str(self.count[name])
@@ -30,7 +30,7 @@ class AstTreeBuilder():
             return new_name
 
         def factor(self):
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is not None and lex['type'] == 'OP_closebrackets':
                 raise CompileError()
             item = lex
@@ -38,8 +38,8 @@ class AstTreeBuilder():
             if lex is not None and lex['type'] == 'OP_openbrackets':
                 is_leaf = False
                 item = self.arithmetic_expression()
-                lex = self.lexer.next()
-                # print('s', self.lexer.num)
+                lex = self.tokenized_expression.next()
+                # print('s', self.tokenized_expression.num)
                 if lex is None or lex['type'] != 'OP_closebrackets':
                     raise CompileError()
             res = None
@@ -54,7 +54,7 @@ class AstTreeBuilder():
                 raise CompileError()
             item2 = None
             op = None
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is not None:
                 while lex is not None and lex['type'] == 'OP_mullike':
                     if item2 is not None:
@@ -65,9 +65,9 @@ class AstTreeBuilder():
                     if item2 is None:
                         raise CompileError()
 
-                    lex = self.lexer.next()
+                    lex = self.tokenized_expression.next()
                 else:
-                    self.lexer.prev()
+                    self.tokenized_expression.prev()
 
             res = Node(op, [item1, item2],
                         node_name = self._get_name('t', op))
@@ -80,7 +80,7 @@ class AstTreeBuilder():
                 raise CompileError()
             item2 = None
             op = None
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is not None:
                 while lex is not None and lex['type'] == 'OP_addlike':
                     if item2 is not None:
@@ -90,9 +90,9 @@ class AstTreeBuilder():
                     if item2 is None:
                         raise CompileError()
 
-                    lex = self.lexer.next()
+                    lex = self.tokenized_expression.next()
                 else:
-                    self.lexer.prev()
+                    self.tokenized_expression.prev()
             return Node(op, [item1, item2], node_name = self._get_name('ae', op))
 
         def expression(self, ):
@@ -101,9 +101,9 @@ class AstTreeBuilder():
             if item1 is None:
                 raise CompileError()
             op = None
-            # print(self.lexer.num)
-            # print(len(self.lexer.tokens))
-            lex = self.lexer.next()
+            # print(self.tokenized_expression.num)
+            # print(len(self.tokenized_expression.tokens))
+            lex = self.tokenized_expression.next()
             if lex is not None:
                 if lex['type'] == 'OP_comparelike':
                     op = lex
@@ -114,17 +114,17 @@ class AstTreeBuilder():
                     # print(lex)
                     raise CompileError()
                 else:
-                    self.lexer.prev()
+                    self.tokenized_expression.prev()
 
             return Node(op, [item1, item2], node_name = self._get_name('e', op))
 
 
         def operator(self):
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is None or lex['type'] != 'NAME':
                 raise CompileError()
             item1 = Node(None, [lex, None], is_leaf = True, node_name = self._get_name('i', None, lex))
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is None or lex['type'] != 'OP_assignment':
                 raise CompileError()
 
@@ -138,9 +138,9 @@ class AstTreeBuilder():
 
         def operator_list_tail(self):
             items = []
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is None or lex['type'] != 'OP_sep':
-                self.lexer.prev()
+                self.tokenized_expression.prev()
                 return None
             item = self.operator()
             if item is None:
@@ -164,25 +164,24 @@ class AstTreeBuilder():
             return Node(None, items, node_name = self._get_name('ol', None))
 
         def block(self):
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
             if lex is None or lex['type'] != 'OP_blockopenbrackets':
                 raise CompileError()
             item = self.operator_list()
-            lex = self.lexer.next()
+            lex = self.tokenized_expression.next()
 
             if lex is None or lex['type'] != 'OP_blockclosebrackets':
                 raise CompileError()
 
             return Node(None, [item, None], node_name = self._get_name('b', None))
 
+        def parse(self):
+                self.programm()
+                if self.tokenized_expression.num < len(self.tokenized_expression.tokens):
+                    raise CompileError()
+
         def programm(self):
             item = self.block()
             self.root.operations = None
             self.root.nodes = [item, None]
             self.root.node_name = self._get_name('p', None)
-
-        def build(self, lexer):
-            self.lexer = lexer
-            self.programm()
-            if self.lexer.num < len(self.lexer.tokens):
-                raise CompileError()
