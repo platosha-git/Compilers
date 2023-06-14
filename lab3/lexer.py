@@ -2,21 +2,21 @@ import re
 
 class Lexer():
 	def __init__(self):
-		self.keywords = set(["while", "do", "end", "if", "elseif", "else", "then", "function", "return", "for", "in"])
-		self.operators = set(["<=", ">=", "=", "==", "(", ")", "<", "+", "-", "*", "/", ">", "{", "}", ";", "<>"])
+		self.keywords = {"while", "do", "end", "if", "elseif", "else", "then", "function", "return", "for", "in"}
+		self.operators = {"<=", ">=", "=", "==", "(", ")", "<", "+", "-", "*", "/", ">", "{", "}", ";", "<>"}
 
-		self.operators_add_like = set(["+", "-"])
-		self.operators_mul_like = set(["*", "/"])
-		self.operators_compare_like = set(["<=", ">=", "==", ">", "<", "<>"])
+		self.operators_add_like = {"+", "-"}
+		self.operators_mul_like = {"*", "/"}
+		self.operators_compare_like = {"<=", ">=", "==", ">", "<", "<>"}
 
-		self.open_brackets = set(["("])
-		self.close_brackets = set([")"])
+		self.open_brackets = {"("}
+		self.close_brackets = {")"}
 
-		self.block_open_brackets = set(["{"])
-		self.block_close_brackets = set(["}"])
+		self.block_open_brackets = {"{"}
+		self.block_close_brackets = {"}"}
 
-		self.operator_sep = set([";"])
-		self.operator_assignment = set(["="])
+		self.operator_sep = {";"}
+		self.operator_assignment = {"="}
 
 		self.tokens = []
 		self.num = 0

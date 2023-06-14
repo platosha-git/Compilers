@@ -1,4 +1,4 @@
-from compiler import Compiler 
+from main import Compiler
 from exception import CompileError
 
 def test():
