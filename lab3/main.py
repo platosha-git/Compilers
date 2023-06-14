@@ -1,3 +1,4 @@
+from exception import CompileError
 from parser import parse
 from tokenizer import tokenize
 
@@ -7,13 +8,14 @@ def validate_expression(expression):
 
 def main():
         try:
-                with open('grammarTest2.txt', 'r') as f:
+                with open('grammar.txt', 'r') as f:
                         expression = f.read()
                         validate_expression(expression)
                 print(expression)
                 print("Выражение валидно")
-        except SyntaxError as e:
-                print(f"Ошибка в синтаксисе {expression}")
+        except CompileError:
+                print(expression)
+                print("Выражение невалидно")
 
 
 if __name__ == '__main__':
