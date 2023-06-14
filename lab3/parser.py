@@ -1,5 +1,9 @@
 from exception import CompileError
 
+def parse(expression):
+        ast = AstTreeBuilder()
+        ast.build(expression)
+
 class Node():
         def __init__(self, operations = None, nodes = None, is_leaf = False, node_name = 'NO_NAME'):
                 self.operations = operations
@@ -11,7 +15,7 @@ class AstTreeBuilder():
         def __init__(self):
                 self.lexer = None
                 self.root = Node()
-                self.operations_after_expression = set( ['OP_blockopenbrackets', 'OP_blockclosebrackets', 'OP_sep'])
+                self.operations_after_expression = {'OP_blockopenbrackets', 'OP_blockclosebrackets', 'OP_sep'}
                 self.count = {'f': 0, 'i': 0, 't': 0, 'ae': 0,
                                       'e': 0, 'o': 0, 'olt': 0,
                                       'ol': 0, 'b': 0, 'p': 0}
