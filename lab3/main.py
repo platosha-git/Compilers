@@ -7,7 +7,7 @@ def validate_expression(expression):
 
 def main():
         try:
-                with open('grammarTest.txt', 'r') as f:
+                with open('grammarTest2.txt', 'r') as f:
                         expression = f.read()
                         validate_expression(expression)
                 print(expression)

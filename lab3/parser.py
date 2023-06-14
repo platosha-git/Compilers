@@ -23,10 +23,12 @@ class Parser:
                 token = self.tokenized_expression.next()
                 self.token_check(token, 'OP_blockopenbrackets')
 
-                self.operator_list()
-                self.operator_list()
-
                 token = self.tokenized_expression.next()
+                while token['type'] != 'OP_blockclosebrackets':
+                    self.tokenized_expression.prev()
+                    self.operator_list()
+                    token = self.tokenized_expression.next()
+
                 self.token_check(token, 'OP_blockclosebrackets')
 
         def operator_list(self):
