@@ -1,7 +1,11 @@
 import re
 
-class Lexer():
-	def __init__(self):
+def parse(expression):
+	parser = Parser(expression)
+	return parser
+
+class Parser():
+	def __init__(self, expression):
 		self.keywords = {"while", "do", "end", "if", "elseif", "else", "then", "function", "return", "for", "in"}
 		self.operators = {"<=", ">=", "=", "==", "(", ")", "<", "+", "-", "*", "/", ">", "{", "}", ";", "<>"}
 
@@ -18,26 +22,11 @@ class Lexer():
 		self.operator_sep = {";"}
 		self.operator_assignment = {"="}
 
-		self.tokens = []
+		self.parse(expression)
+
+	def parse(self, expression):
 		self.num = 0
-
-	def next(self):
-		res = None
-		if self.num < len(self.tokens):
-			res = self.tokens[self.num]
-		self.num += 1
-		return res
-
-	def prev(self):
-		res = None
-		if len(self.tokens) > self.num > 0:
-			res = self.tokens[self.num]
-		self.num -= 1
-		return res
-
-	def lex(self, source):
-		self.num = 0
-		chars = list(source)
+		chars = list(expression)
 		self.tokens = []
 
 		while len(chars):
@@ -98,6 +87,20 @@ class Lexer():
 
 			chars.pop(0)
 		return self.tokens
+
+	def next(self):
+		res = None
+		if self.num < len(self.tokens):
+			res = self.tokens[self.num]
+		self.num += 1
+		return res
+
+	def prev(self):
+		res = None
+		if len(self.tokens) > self.num > 0:
+			res = self.tokens[self.num]
+		self.num -= 1
+		return res
 
 	def is_operator(self, char):
 		return char in self.operators
@@ -167,21 +170,3 @@ class Lexer():
 		val = string_chars[2:end_index]
 		del chars[0:end_index+2]
 		return val
-
-
-def main():
-	string = """ { 
-			a = 5;
-			b = 6;
-			a + b < a - b;
-	    	}"""
-
-	lexer = Lexer()
-	tokens = lexer.lex(string)
-
-	for t in tokens:
-		print(t)
-
-
-if __name__ == '__main__':
-	main()
