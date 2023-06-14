@@ -40,6 +40,7 @@ class Parser():
                 item = self.operator_list()
 
                 token = self.tokenized_expression.next()
+                print(token['type'])
                 self.token_check(token, 'OP_blockclosebrackets')
 
                 return Node(None, [item, None], node_name = self._get_name('b', None))
@@ -58,6 +59,9 @@ class Parser():
                         self.tokenized_expression.prev()
                         return None
 
+                if token['type'] == 'OP_sep':
+                        return None
+
                 item = self.operator()
                 if item is None:
                         raise CompileError()
@@ -71,6 +75,9 @@ class Parser():
 
         def operator(self):
                 token = self.tokenized_expression.next()
+                if token['type'] == 'OP_sep':
+                        self.tokenized_expression.prev()
+                        return None
                 self.token_check(token, 'NAME')
 
                 item1 = Node(None, [token, None], is_leaf = True, node_name = self._get_name('i', None, token))
