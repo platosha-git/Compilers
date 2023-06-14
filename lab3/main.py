@@ -1,11 +1,11 @@
 from ast_builder import AstTreeBuilder
-from parser import parse
+from tokenizer import tokenize
 
 def validate_expression(expression):
-        parsed_expression = parse(expression)
+        tokenized_expression = tokenize(expression)
 
         ast = AstTreeBuilder()
-        ast.build(parsed_expression)
+        ast.build(tokenized_expression)
 
 def main():
         try:

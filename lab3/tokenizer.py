@@ -1,10 +1,10 @@
 import re
 
-def parse(expression):
-	parser = Parser(expression)
-	return parser
+def tokenize(expression):
+	tokenizer = Tokenizer(expression)
+	return tokenizer
 
-class Parser():
+class Tokenizer():
 	def __init__(self, expression):
 		self.keywords = {"while", "do", "end", "if", "elseif", "else", "then", "function", "return", "for", "in"}
 		self.operators = {"<=", ">=", "=", "==", "(", ")", "<", "+", "-", "*", "/", ">", "{", "}", ";", "<>"}
@@ -22,9 +22,12 @@ class Parser():
 		self.operator_sep = {";"}
 		self.operator_assignment = {"="}
 
-		self.parse(expression)
+		self.num = 0
+		self.tokens = []
 
-	def parse(self, expression):
+		self.tokenize(expression)
+
+	def tokenize(self, expression):
 		self.num = 0
 		chars = list(expression)
 		self.tokens = []
